@@ -29,7 +29,7 @@ PALETTE = {
 }
 FAMILIES = ("behavior", "backdoor", "audit", "hijack")
 BASELINES = ("oracle", "noop", "scripted")
-SITE_URL = "https://gpt-agi.github.io/weight-space-programing"
+SITE_URL = "https://gpt-agi.github.io/Weight-Space-Programing"
 DESCRIPTION = (
     "An open benchmark for repairing known defects in Qwen3.5-0.8B "
     "with the same harness, budget, and offline sandbox."
@@ -259,7 +259,7 @@ def page(
 <link rel="stylesheet" href="{prefix}assets/site.css"></head><body>{watermark}
 <header class="site"><nav class="nav shell"><a class="brand" href="{prefix}index.html">WSP-Bench</a>
 <a href="{prefix}index.html#leaderboard">Leaderboard</a><a href="{prefix}method.html">Rules &amp; method</a>
-<a href="{prefix}review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/weight-space-programing">GitHub</a></nav></header>
+<a href="{prefix}review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a></nav></header>
 {body}
 <footer class="site"><div class="footer-row shell"><span>WSP-Bench · all traces and costs public</span><span>Qwen3.5-0.8B · v0.1</span></div></footer>
 <script src="{prefix}assets/site.js"></script></body></html>"""

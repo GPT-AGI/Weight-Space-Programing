@@ -98,10 +98,14 @@
 - [ ] 自我改进：一个跨回合学习的方法库，在留出的缺陷类型上衡量进步
 - [ ] 模型能改进自己的权重吗？分阶段研究，由留出评测把关
 
-规则与评分细节：[gpt-agi.github.io/weight-space-programing/method.html](https://gpt-agi.github.io/weight-space-programing/method.html)
+规则与评分细节：[gpt-agi.github.io/Weight-Space-Programing/method.html](https://gpt-agi.github.io/Weight-Space-Programing/method.html)
 
 ## 致谢
 
 灵感来自 [Sparks of Weight-Space Programming](https://rikiyat.github.io/blog/weight-space-programming/)，作者 Rikiya Takehi、Jayden Teoh、Alex Zhang、Omar Khattab（MIT CSAIL）。
 原作者日志：[RikiyaT/lm_understand-logs](https://github.com/RikiyaT/lm_understand-logs)（CC BY 4.0）。
 动图由 [`scripts/make_readme_assets.py`](scripts/make_readme_assets.py) 生成。
+
+## 许可证
+
+[MIT](LICENSE)。对照页中引用的原作者日志片段仍遵循 CC BY 4.0。
