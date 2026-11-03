@@ -35,18 +35,257 @@ DESCRIPTION = (
     "with the same harness, budget, and offline sandbox."
 )
 
+TEXT = {
+    "en": {
+        "description": DESCRIPTION,
+        "nav_leaderboard": "Leaderboard",
+        "nav_method": "Rules & method",
+        "nav_review": "Blog review",
+        "footer": "WSP-Bench · all traces and costs public",
+        "preview": "PREVIEW · FIXTURE DATA",
+        "index_title": "WSP-Bench Leaderboard",
+        "hero_eyebrow": "Weight-space programming, measured",
+        "hero_title": "Who is the best weight-space programmer?",
+        "hero_lede": "We plant known defects in Qwen3.5-0.8B. Every LLM gets the same harness, budget, and offline sandbox. Repairs are scored against exact ground truth; every trace and dollar is public.",
+        "pill_families": "4 defect families",
+        "pill_tiers": "3 difficulty tiers",
+        "pill_bounds": "Oracle 100 · No-op 0",
+        "pill_script": "No-LLM baseline",
+        "hero_alt": "WSP-Bench leaderboard preview",
+        "leaderboard": "Leaderboard",
+        "leaderboard_caption": "Overall score is the mean across instances. Confidence intervals bootstrap instances.",
+        "split": "{split} split",
+        "model": "Model",
+        "overall": "Overall",
+        "family_behavior": "Behavior",
+        "family_backdoor": "Backdoor",
+        "family_audit": "Audit",
+        "family_hijack": "Hijack",
+        "cost_full": "$ / full run",
+        "tokens": "Tokens",
+        "gpu_calls": "GPU calls",
+        "instances": "{count} instances",
+        "ci": "95% CI {lo:.1f}–{hi:.1f}",
+        "pareto_title": "Score vs. cost",
+        "pareto_caption": "Higher and farther left is better. The dashed line marks the model Pareto frontier; cost uses a logarithmic axis.",
+        "pareto_empty": "The score-vs-cost chart will appear when results are available.",
+        "pareto_aria": "Overall score versus cost per full run, with a logarithmic cost axis",
+        "pareto_x": "$ per full run (log scale)",
+        "pareto_y": "Overall score",
+        "pareto_tooltip": "{name}: {score:.1f} at ${cost:.2f}",
+        "caveats_title": "What this does not show",
+        "caveats_caption": "A benchmark result is evidence about performance under these rules—not a broader metaphysical claim.",
+        "method_link": "Read rules & method →",
+        "caveat_synthetic": "Synthetic defects",
+        "caveat_synthetic_text": "The planted failures are controlled tasks with exact ground truth, not a claim about every real model failure.",
+        "caveat_native": "Not native “weight reading”",
+        "caveat_native_text": "A high score means the model runs a find-direction → edit → verify loop effectively with the supplied tools.",
+        "caveat_cost": "Cost is part of the result",
+        "caveat_cost_text": "Scores share a fixed budget, but provider pricing, token accounting, and default reasoning modes still matter.",
+        "empty_eyebrow": "Results pending",
+        "empty_title": "Leaderboard launching Nov 6",
+        "empty_text": "Official runs will appear here with bootstrap confidence intervals, costs, token counts, GPU calls, and full public traces.",
+        "empty_roster": "Initial model roster",
+        "method_title": "Rules & Method · WSP-Bench",
+        "method_eyebrow": "Rules & method",
+        "method_h1": "One harness. Exact ground truth.",
+        "method_lede": "WSP-Bench measures how well an LLM can investigate and repair controlled weight-space defects without access to the clean checkpoint.",
+        "task_families": "Task families",
+        "behavior_name": "Behavior injection",
+        "behavior_desc": "A rank-one edit induces a language switch, capitalization, repetition, or another measurable behavior. Repair it without collateral damage.",
+        "backdoor_name": "Trigger backdoor",
+        "backdoor_desc": "An unknown trigger activates a rank-one key→value edit. Identify the trigger and remove the backdoor.",
+        "audit_name": "Localization audit",
+        "audit_desc": "A hidden edit appears somewhere in the network. Report the layer, parameter, and direction without editing.",
+        "hijack_name": "Neuron hijack",
+        "hijack_desc": "A small group of amplified neurons floods output with one token. Restore normal behavior.",
+        "scoring": "Scoring",
+        "scoring_intro": "For edit tasks, repair is measured on hidden prompts and discounted by collateral change on held-out general text. Values are clipped to their stated ranges.",
+        "scoring_detail": "Collateral penalty is derived from mean per-token KL(clean ∥ submitted) between frozen free and maximum thresholds. Audit tasks use <code>100 × localization</code>, combining layer/parameter identification and absolute cosine similarity to the planted direction. Overall score is the mean of instance scores, with a bootstrap 95% confidence interval over instances.",
+        "fairness": "Fairness and anti-leakage",
+        "fair_1": "Every model receives the same system prompt, text protocol, turn limit, GPU-call limit, edit budget, and dollar cap.",
+        "fair_2": "The Python sandbox has no network and contains only the broken model. The clean checkpoint and ground truth remain in the scoring process.",
+        "fair_3": "Defect direction, strength, layer, and trigger are randomized. Official test specifications and seeds remain private.",
+        "fair_4": "Behavior metrics are rule-based. No LLM judge is used.",
+        "fair_5": "Every run records model ID, provider settings, tokens, dollars, GPU calls, stop reason, and the complete trace.",
+        "budget": "Budget",
+        "budget_text": "Each v0.1 instance allows at most <b>40 turns</b>, <b>20 GPU calls</b>, batches of <b>64</b>, generations of <b>128 new tokens</b>, <b>262,144 changed parameters</b>, and <b>$1.50</b> in model API cost. Reaching a limit stops the episode and scores the current submission.",
+        "references": "Reference rows",
+        "ref_oracle": "<b>Oracle (100):</b> knows and reverses the planted edit.",
+        "ref_noop": "<b>No-op (0):</b> submits the broken model unchanged.",
+        "ref_script": "<b>Scripted pipeline:</b> a fixed no-LLM interpretability loop. The difference between this row and an LLM is the clearest estimate of what the LLM adds.",
+        "interpretation": "Interpretation",
+        "interpretation_text": "These are synthetic defects designed for exact scoring. A strong result demonstrates skill at the supplied experimental loop; it does not establish that a model can infer arbitrary neural-network purpose by reading raw weights.",
+        "score": "Score",
+        "repair": "Repair",
+        "collateral": "Collateral",
+        "localization": "Localization",
+        "cost": "Cost",
+        "yes": "yes",
+        "no": "no",
+        "trace_none": "No trace was recorded for this run.",
+        "trace_missing": "Trace artifact is not available: {name}",
+        "trace_malformed": "Trace ended at malformed line {line}: {error}",
+        "reasoning": "Reasoning",
+        "executed_python": "Executed Python",
+        "gpu_metric": "{count} cumulative GPU calls",
+        "turn": "TURN",
+        "turn_label": "TURN {number:02d}",
+        "stop": "Stop",
+        "label_separator": ":",
+        "turns": "turns",
+        "harness": "harness",
+        "stop_submitted": "submitted",
+        "stop_max_turns": "max turns",
+        "stop_max_usd": "cost limit",
+        "stop_gpu_budget": "GPU budget",
+        "stop_error": "error",
+        "trace_description": "Public WSP-Bench trace for {model} on {instance}.",
+        "role_system": "system",
+        "role_user": "user",
+        "role_assistant": "assistant",
+        "role_tool": "tool",
+        "tier_easy": "easy",
+        "tier_medium": "medium",
+        "tier_hard": "hard",
+        "review_title": "Astra's Qwen Math Weight Edit · Claims vs. Logs",
+        "review_description": "A factual, claim-by-claim review of Experiment 8 against the authors' public logs.",
+    },
+    "zh": {
+        "description": "开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。",
+        "nav_leaderboard": "排行榜",
+        "nav_method": "规则与方法",
+        "nav_review": "博客核查",
+        "footer": "WSP-Bench · 轨迹与成本全部公开",
+        "preview": "预览 · 模拟数据",
+        "index_title": "WSP-Bench 排行榜",
+        "hero_eyebrow": "量化评测权重空间编程",
+        "hero_title": "谁是最强的 weight-space programmer？",
+        "hero_lede": "我们在 Qwen3.5-0.8B 中植入已知缺陷，让每个大模型使用同一套工具、预算和断网沙箱完成修复。评分对照精确真值，全部轨迹与成本公开。",
+        "pill_families": "4 类缺陷",
+        "pill_tiers": "3 档难度",
+        "pill_bounds": "Oracle 100 · No-op 0",
+        "pill_script": "无 LLM 基线",
+        "hero_alt": "WSP-Bench 排行榜预览",
+        "leaderboard": "排行榜",
+        "leaderboard_caption": "总分为各实例的平均分；置信区间通过实例级 bootstrap 计算。",
+        "split": "{split} 集",
+        "model": "模型",
+        "overall": "总分",
+        "family_behavior": "行为植入",
+        "family_backdoor": "触发器后门",
+        "family_audit": "定位审计",
+        "family_hijack": "神经元劫持",
+        "cost_full": "完整运行成本",
+        "tokens": "Token",
+        "gpu_calls": "GPU 调用",
+        "instances": "{count} 个实例",
+        "ci": "95% CI {lo:.1f}–{hi:.1f}",
+        "pareto_title": "分数与成本",
+        "pareto_caption": "越靠左上越好。虚线为模型的帕累托前沿，成本轴采用对数刻度。",
+        "pareto_empty": "有结果后将在此显示分数—成本图。",
+        "pareto_aria": "总分与完整运行成本，成本轴为对数刻度",
+        "pareto_x": "完整运行成本（美元，对数刻度）",
+        "pareto_y": "总分",
+        "pareto_tooltip": "{name}：{score:.1f} 分，成本 ${cost:.2f}",
+        "caveats_title": "这些结果不能说明什么",
+        "caveats_caption": "基准分数只反映模型在这套规则下的表现，不应被外推成更宽泛的能力结论。",
+        "method_link": "查看规则与方法 →",
+        "caveat_synthetic": "缺陷是合成的",
+        "caveat_synthetic_text": "植入缺陷是可精确评分的受控任务，不代表现实中的所有模型故障。",
+        "caveat_native": "不等于“原生读懂权重”",
+        "caveat_native_text": "高分说明模型能有效完成“找方向 → 改权重 → 验证”的实验闭环。",
+        "caveat_cost": "成本也是结果",
+        "caveat_cost_text": "预算上限一致，但供应商定价、Token 口径和默认推理模式仍会影响成本。",
+        "empty_eyebrow": "结果待发布",
+        "empty_title": "排行榜将于 11 月 6 日上线",
+        "empty_text": "正式结果将在这里展示 bootstrap 置信区间、成本、Token、GPU 调用次数和完整公开轨迹。",
+        "empty_roster": "首发模型",
+        "method_title": "规则与方法 · WSP-Bench",
+        "method_eyebrow": "规则与方法",
+        "method_h1": "同一套工具，精确真值。",
+        "method_lede": "WSP-Bench 衡量大模型在看不到干净检查点的条件下，排查并修复受控权重缺陷的能力。",
+        "task_families": "任务类型",
+        "behavior_name": "行为植入",
+        "behavior_desc": "通过秩 1 编辑诱导语言切换、全大写、复读等可测行为；修复缺陷，同时控制副作用。",
+        "backdoor_name": "触发器后门",
+        "backdoor_desc": "未知触发词会激活秩 1 key→value 编辑；找出触发条件并清除后门。",
+        "audit_name": "定位审计",
+        "audit_desc": "网络某处被植入编辑；不修改权重，只报告层、参数和方向。",
+        "hijack_name": "神经元劫持",
+        "hijack_desc": "少量被放大的神经元让某个 Token 刷屏；将输出恢复正常。",
+        "scoring": "评分",
+        "scoring_intro": "编辑类任务在隐藏提示集上衡量修复率，并按通用留出文本上的副作用扣分；各项均截断到规定范围。",
+        "scoring_detail": "副作用惩罚由逐 Token 平均 KL(clean ∥ submitted) 计算，免罚与满罚阈值在评测前冻结。审计任务使用 <code>100 × localization</code>，综合层/参数定位和报告方向与真值方向的绝对余弦相似度。总分为实例平均分，并对实例做 bootstrap 得到 95% 置信区间。",
+        "fairness": "公平性与防泄漏",
+        "fair_1": "所有模型使用相同的 system prompt、文本协议、轮数上限、GPU 调用上限、编辑预算和美元上限。",
+        "fair_2": "Python 沙箱断网，且只包含坏模型；干净检查点和真值仅存在于评分进程。",
+        "fair_3": "缺陷方向、强度、层号和触发词均随机生成；正式 test 规格与种子不公开。",
+        "fair_4": "行为指标全部由规则计算，不使用 LLM 裁判。",
+        "fair_5": "每次运行都记录模型 ID、供应商设置、Token、美元成本、GPU 调用、停止原因和完整轨迹。",
+        "budget": "预算",
+        "budget_text": "v0.1 每个实例最多 <b>40 轮</b>、<b>20 次 GPU 调用</b>，batch 上限 <b>64</b>，单次生成最多 <b>128 个新 Token</b>，最多改动 <b>262,144 个参数</b>，模型 API 成本上限 <b>$1.50</b>。触及任一上限后停止，并按当前提交评分。",
+        "references": "参照行",
+        "ref_oracle": "<b>Oracle（100）：</b>知道植入编辑并直接逆转。",
+        "ref_noop": "<b>No-op（0）：</b>不做任何修改，直接提交坏模型。",
+        "ref_script": "<b>固定脚本：</b>不使用 LLM 的固定可解释性流程。它与各 LLM 的分差，是衡量 LLM 额外贡献的直接参照。",
+        "interpretation": "如何解读",
+        "interpretation_text": "这些合成缺陷用于实现精确评分。高分证明模型擅长执行给定实验闭环，但不能证明它能仅凭原始权重推断任意神经网络的用途。",
+        "score": "得分",
+        "repair": "修复率",
+        "collateral": "副作用",
+        "localization": "定位",
+        "cost": "成本",
+        "yes": "是",
+        "no": "否",
+        "trace_none": "本次运行没有记录轨迹。",
+        "trace_missing": "轨迹文件不可用：{name}",
+        "trace_malformed": "轨迹在第 {line} 行解析失败：{error}",
+        "reasoning": "推理",
+        "executed_python": "执行的 Python",
+        "gpu_metric": "累计 {count} 次 GPU 调用",
+        "turn": "第",
+        "turn_label": "第 {number:02d} 轮",
+        "stop": "停止原因",
+        "label_separator": "：",
+        "turns": "轮",
+        "harness": "工具版本",
+        "stop_submitted": "已提交",
+        "stop_max_turns": "达到轮数上限",
+        "stop_max_usd": "达到成本上限",
+        "stop_gpu_budget": "GPU 预算耗尽",
+        "stop_error": "错误",
+        "trace_description": "{model} 在 {instance} 上的 WSP-Bench 公开轨迹。",
+        "role_system": "系统",
+        "role_user": "用户",
+        "role_assistant": "助手",
+        "role_tool": "工具",
+        "tier_easy": "简单",
+        "tier_medium": "中等",
+        "tier_hard": "困难",
+        "review_title": "Astra 修改 Qwen 数学权重：博客说法与公开日志对照",
+        "review_description": "依据原作者公开日志，对 Experiment 8 逐条核查与分析。",
+    },
+}
+
+
+def tr(lang: str, key: str, **values: Any) -> str:
+    return TEXT[lang][key].format(**values)
+
 
 SITE_CSS = r"""
 :root{--bg:#F5F4EE;--paper:#FAF9F5;--ink:#141413;--accent:#D97757;--green:#6A8F6B;--gray:#8A867D;--soft:#3D3B36;--line:#E2DED3;--beige:#EFE9DC}
 *{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}
 body{margin:0;color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+html[lang^="zh"] body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif}
 a{color:inherit;text-decoration-color:var(--accent);text-underline-offset:3px}
 .shell{width:min(1160px,calc(100% - 40px));margin:auto}.narrow{width:min(820px,calc(100% - 40px));margin:auto}
 header.site{border-bottom:1px solid var(--line);background:rgba(245,244,238,.94);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
-.nav{height:58px;display:flex;align-items:center;gap:25px}.brand{font:500 21px Georgia,serif;text-decoration:none;margin-right:auto}.nav a:not(.brand){font-size:13px;text-decoration:none;color:var(--soft)}.nav a:hover{color:var(--accent)}
+.nav{height:58px;display:flex;align-items:center;gap:25px}.brand{font:500 21px Georgia,serif;text-decoration:none;margin-right:auto}.nav a:not(.brand){font-size:13px;text-decoration:none;color:var(--soft)}.nav a:hover{color:var(--accent)}.language{display:flex;align-items:center;gap:6px;border-left:1px solid var(--line);padding-left:18px;font-size:12px}.language a.active{color:var(--accent);font-weight:700}.language span{color:var(--line)}
 .hero{display:grid;grid-template-columns:1.3fr .7fr;gap:44px;padding:72px 0 52px;align-items:center}
 .eyebrow{color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 h1,h2,h3,.score{font-family:Georgia,"Times New Roman",serif;font-weight:500}h1{font-size:clamp(42px,6vw,72px);line-height:1.02;margin:13px 0 20px;letter-spacing:-.025em}h2{font-size:30px;line-height:1.2;margin:0 0 8px}h3{font-size:21px;margin:28px 0 8px}
+html[lang^="zh"] h1,html[lang^="zh"] h2,html[lang^="zh"] h3{font-family:"Songti SC","Noto Serif CJK SC",STSong,serif}
 .lede{font-size:19px;line-height:1.6;color:var(--soft);max-width:720px}.hero img{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--soft);background:var(--paper)}
 section{padding:42px 0;border-top:1px solid var(--line)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px}.muted{color:var(--gray)}.small{font-size:13px}.kicker{font-size:13px;color:var(--gray);margin:0}
@@ -64,7 +303,7 @@ tr.baseline{background:var(--beige)}tr.baseline-oracle{box-shadow:inset 4px 0 va
 .missing{padding:24px;border:1px dashed var(--line);border-radius:9px;background:var(--paper);color:var(--soft)}
 footer.site{border-top:1px solid var(--line);padding:24px 0 45px;color:var(--gray);font-size:12px}.footer-row{display:flex;justify-content:space-between;gap:20px}
 .watermark{position:fixed;right:-48px;top:42px;transform:rotate(35deg);background:var(--accent);color:white;padding:7px 62px;z-index:30;font-size:11px;font-weight:800;letter-spacing:.12em;pointer-events:none}
-@media(max-width:800px){.hero{grid-template-columns:1fr;padding-top:48px}.hero img{display:none}.caveats,.family-grid{grid-template-columns:1fr}.trace-stats{grid-template-columns:repeat(3,1fr)}.turn{grid-template-columns:1fr;gap:4px}.turn-meta{padding-top:0}.nav{gap:14px}.roster{columns:1}.section-head{align-items:start;flex-direction:column}}
+@media(max-width:800px){.hero{grid-template-columns:1fr;padding-top:48px}.hero img{display:none}.caveats,.family-grid{grid-template-columns:1fr}.trace-stats{grid-template-columns:repeat(3,1fr)}.turn{grid-template-columns:1fr;gap:4px}.turn-meta{padding-top:0}.nav{gap:12px}.nav>a:not(.brand){display:none}.language{padding-left:10px}.roster{columns:1}.section-head{align-items:start;flex-direction:column}}
 """
 
 
@@ -99,6 +338,9 @@ document.querySelectorAll("[data-split-button]").forEach(button => {
       other.classList.toggle("active", other === button);
     });
   });
+});
+document.querySelectorAll("[data-language]").forEach(link => {
+  link.addEventListener("click", () => localStorage.setItem("wsp-language", link.dataset.language));
 });
 """
 
@@ -233,7 +475,7 @@ def roster_from_config() -> list[str]:
     return names
 
 
-def social_meta(title: str, description: str, image_path: str = "assets/og.png") -> str:
+def social_meta(title: str, description: str) -> str:
     image = f"{SITE_URL}/assets/og.png"
     return f"""<meta name="description" content="{esc(description)}">
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}">
@@ -243,25 +485,62 @@ def social_meta(title: str, description: str, image_path: str = "assets/og.png")
 
 
 def page(
+    lang: str,
     title: str,
     body: str,
     *,
     prefix: str = "",
-    description: str = DESCRIPTION,
+    en_href: str,
+    zh_href: str,
+    description: str | None = None,
     preview: bool = False,
+    auto_redirect: bool = False,
 ) -> str:
     watermark = (
-        '<div class="watermark">PREVIEW · FIXTURE DATA</div>' if preview else ""
+        f'<div class="watermark">{tr(lang, "preview")}</div>' if preview else ""
     )
+    language_dir = "zh/" if lang == "zh" else ""
+    home = f"{prefix}{language_dir}index.html"
+    method = f"{prefix}{language_dir}method.html"
+    review = f'{prefix}review/{"zh.html" if lang == "zh" else "index.html"}'
+    redirect = ""
+    if auto_redirect:
+        redirect = f"""<script>
+(() => {{
+  try {{
+    const query = new URLSearchParams(location.search);
+    const requested = query.get("lang");
+    if (requested === "en") {{
+      localStorage.setItem("wsp-language", "en");
+      return;
+    }}
+    if (requested === "zh") {{
+      localStorage.setItem("wsp-language", "zh");
+      location.replace("{zh_href}");
+      return;
+    }}
+    const stored = localStorage.getItem("wsp-language");
+    if (stored === "zh" || (!stored && navigator.language.toLowerCase().startsWith("zh"))) {{
+      if (!stored) localStorage.setItem("wsp-language", "zh");
+      location.replace("{zh_href}");
+    }}
+  }} catch (_) {{}}
+}})();
+</script>"""
+    language = "zh-CN" if lang == "zh" else "en"
+    active_en = " active" if lang == "en" else ""
+    active_zh = " active" if lang == "zh" else ""
+    description = description or tr(lang, "description")
     return f"""<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(title)}</title>{social_meta(title, description)}
+<html lang="{language}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(title)}</title>{social_meta(title, description)}{redirect}
 <link rel="stylesheet" href="{prefix}assets/site.css"></head><body>{watermark}
-<header class="site"><nav class="nav shell"><a class="brand" href="{prefix}index.html">WSP-Bench</a>
-<a href="{prefix}index.html#leaderboard">Leaderboard</a><a href="{prefix}method.html">Rules &amp; method</a>
-<a href="{prefix}review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a></nav></header>
+<header class="site"><nav class="nav shell"><a class="brand" href="{home}">WSP-Bench</a>
+<a href="{home}#leaderboard">{tr(lang, "nav_leaderboard")}</a><a href="{method}">{tr(lang, "nav_method")}</a>
+<a href="{review}">{tr(lang, "nav_review")}</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a>
+<span class="language"><a class="{active_en.strip()}" data-language="en" href="{en_href}">EN</a><span>/</span><a class="{active_zh.strip()}" data-language="zh" href="{zh_href}">中文</a></span></nav></header>
 {body}
-<footer class="site"><div class="footer-row shell"><span>WSP-Bench · all traces and costs public</span><span>Qwen3.5-0.8B · v0.1</span></div></footer>
+<footer class="site"><div class="footer-row shell"><span>{tr(lang, "footer")}</span><span>Qwen3.5-0.8B · v0.1</span></div></footer>
 <script src="{prefix}assets/site.js"></script></body></html>"""
 
 
@@ -284,11 +563,11 @@ def trace_url(row: dict[str, Any]) -> str:
     )
 
 
-def table_html(summary: list[dict[str, Any]]) -> str:
+def table_html(summary: list[dict[str, Any]], lang: str) -> str:
     header = (
-        "<thead><tr><th>Model</th><th>Overall</th>"
-        + "".join(f"<th>{name.title()}</th>" for name in FAMILIES)
-        + "<th>$ / full run</th><th>Tokens</th><th>GPU calls</th></tr></thead>"
+        f"<thead><tr><th>{tr(lang, 'model')}</th><th>{tr(lang, 'overall')}</th>"
+        + "".join(f"<th>{tr(lang, f'family_{name}')}</th>" for name in FAMILIES)
+        + f"<th>{tr(lang, 'cost_full')}</th><th>{tr(lang, 'tokens')}</th><th>{tr(lang, 'gpu_calls')}</th></tr></thead>"
     )
     rows = []
     for item in summary:
@@ -302,12 +581,12 @@ def table_html(summary: list[dict[str, Any]]) -> str:
             model_label = f'<a href="{trace_url(first)}">{model_label}</a>'
         model_cell = (
             f'<td data-value="{esc(item["display_name"])}"><span class="model">{model_label}'
-            f'<small>{item["instances"]} instances</small></span></td>'
+            f'<small>{tr(lang, "instances", count=item["instances"])}</small></span></td>'
         )
         lo, hi = item["ci"]
         score_cell = (
             f'<td data-value="{item["score"]:.5f}"><span class="score">{item["score"]:.1f}</span>'
-            f'<span class="ci">95% CI {lo:.1f}–{hi:.1f}</span></td>'
+            f'<span class="ci">{tr(lang, "ci", lo=lo, hi=hi)}</span></td>'
         )
         family_cells = "".join(
             f'<td data-value="{value if value is not None else -1}">{fmt_score(value)}</td>'
@@ -324,14 +603,14 @@ def table_html(summary: list[dict[str, Any]]) -> str:
     return f'<div class="table-wrap"><table data-sort-table>{header}<tbody>{"".join(rows)}</tbody></table></div>'
 
 
-def pareto_svg(summary: list[dict[str, Any]]) -> str:
+def pareto_svg(summary: list[dict[str, Any]], lang: str) -> str:
     points = [
         row
         for row in summary
         if row["model"].lower() not in ("oracle", "noop") and row["cost"] >= 0
     ]
     if not points:
-        return '<div class="missing">The score-vs-cost chart will appear when results are available.</div>'
+        return f'<div class="missing">{tr(lang, "pareto_empty")}</div>'
 
     positive = [row["cost"] for row in points if row["cost"] > 0]
     floor = min(positive) / 2 if positive else 0.01
@@ -398,40 +677,39 @@ def pareto_svg(summary: list[dict[str, Any]]) -> str:
         suffix = " ($0)" if row["cost"] == 0 else ""
         dots.append(
             f'<circle class="{point_class}" cx="{xx:.1f}" cy="{yy:.1f}" r="6">'
-            f"<title>{esc(row['display_name'])}: {row['score']:.1f} at ${row['cost']:.2f}</title></circle>"
+            f"<title>{esc(tr(lang, 'pareto_tooltip', name=row['display_name'], score=row['score'], cost=row['cost']))}</title></circle>"
             f'<text class="label" x="{xx+8:.1f}" y="{label_y:.1f}">{esc(row["display_name"])}{suffix}</text>'
         )
     return (
         f'<div class="chart"><svg viewBox="0 0 {width} {height}" role="img" '
-        'aria-label="Overall score versus cost per full run, with a logarithmic cost axis">'
+        f'aria-label="{esc(tr(lang, "pareto_aria"))}">'
         + "".join(grid)
         + frontier
         + "".join(dots)
-        + f'<text class="axis" x="{left+plot_w/2:.1f}" y="{height-8}" text-anchor="middle">$ per full run (log scale)</text>'
-        + f'<text class="axis" transform="translate(16 {top+plot_h/2:.1f}) rotate(-90)" text-anchor="middle">Overall score</text>'
+        + f'<text class="axis" x="{left+plot_w/2:.1f}" y="{height-8}" text-anchor="middle">{tr(lang, "pareto_x")}</text>'
+        + f'<text class="axis" transform="translate(16 {top+plot_h/2:.1f}) rotate(-90)" text-anchor="middle">{tr(lang, "pareto_y")}</text>'
         + "</svg></div>"
     )
 
 
-def empty_state() -> str:
+def empty_state(lang: str) -> str:
     roster = roster_from_config()
     items = "".join(f"<li>{esc(name)}</li>" for name in roster)
     roster_html = (
-        f'<p class="small muted">Initial model roster</p><ul class="roster">{items}</ul>'
+        f'<p class="small muted">{tr(lang, "empty_roster")}</p><ul class="roster">{items}</ul>'
         if items
         else ""
     )
     return (
-        '<div class="empty"><p class="eyebrow">Results pending</p>'
-        "<h3>Leaderboard launching Nov 6</h3>"
-        "<p>Official runs will appear here with bootstrap confidence intervals, costs, "
-        "token counts, GPU calls, and full public traces.</p>"
+        f'<div class="empty"><p class="eyebrow">{tr(lang, "empty_eyebrow")}</p>'
+        f"<h3>{tr(lang, 'empty_title')}</h3>"
+        f"<p>{tr(lang, 'empty_text')}</p>"
         f"{roster_html}</div>"
     )
 
 
 def build_index(
-    results: list[dict[str, Any]], output: Path, preview: bool
+    results: list[dict[str, Any]], output: Path, lang: str, preview: bool
 ) -> None:
     by_split: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for result in results:
@@ -447,70 +725,95 @@ def build_index(
             )
             + "</div>"
             if len(splits) > 1
-            else f'<span class="pill">{splits[0]} split</span>'
+            else f'<span class="pill">{tr(lang, "split", split=splits[0])}</span>'
         )
         panels = []
         charts = []
         for index, split in enumerate(splits):
             summary = aggregate(by_split[split])
             panels.append(
-                f'<div data-split-panel="{split}"{" hidden" if index else ""}>{table_html(summary)}</div>'
+                f'<div data-split-panel="{split}"{" hidden" if index else ""}>{table_html(summary, lang)}</div>'
             )
             charts.append(
-                f'<div data-split-panel="{split}"{" hidden" if index else ""}>{pareto_svg(summary)}</div>'
+                f'<div data-split-panel="{split}"{" hidden" if index else ""}>{pareto_svg(summary, lang)}</div>'
             )
         leaderboard = "".join(panels)
         chart = "".join(charts)
     else:
         buttons = ""
-        leaderboard = empty_state()
-        chart = pareto_svg([])
+        leaderboard = empty_state(lang)
+        chart = pareto_svg([], lang)
 
     body = f"""
-<main><div class="hero shell"><div><p class="eyebrow">Weight-space programming, measured</p>
-<h1>Who is the best weight-space programmer?</h1>
-<p class="lede">We plant known defects in Qwen3.5-0.8B. Every LLM gets the same harness, budget, and offline sandbox. Repairs are scored against exact ground truth; every trace and dollar is public.</p>
-<div class="pills"><span class="pill">4 defect families</span><span class="pill">3 difficulty tiers</span><span class="pill">Oracle 100 · No-op 0</span><span class="pill">No-LLM baseline</span></div></div>
-<img src="assets/hero.gif" alt="WSP-Bench leaderboard preview"></div>
-<section id="leaderboard"><div class="shell"><div class="section-head"><div><h2>Leaderboard</h2>
-<p class="kicker">Overall score is the mean across instances. Confidence intervals bootstrap instances.</p></div>{buttons}</div>{leaderboard}</div></section>
-<section><div class="shell"><div class="section-head"><div><h2>Score vs. cost</h2>
-<p class="kicker">Higher and farther left is better. The dashed line marks the model Pareto frontier; cost uses a logarithmic axis.</p></div></div>{chart}</div></section>
-<section><div class="shell"><div class="section-head"><div><h2>What this does not show</h2>
-<p class="kicker">A benchmark result is evidence about performance under these rules—not a broader metaphysical claim.</p></div><a href="method.html">Read rules &amp; method →</a></div>
-<div class="caveats"><div class="card"><b>Synthetic defects</b><p>The planted failures are controlled tasks with exact ground truth, not a claim about every real model failure.</p></div>
-<div class="card"><b>Not native “weight reading”</b><p>A high score means the model runs a find-direction → edit → verify loop effectively with the supplied tools.</p></div>
-<div class="card"><b>Cost is part of the result</b><p>Scores share a fixed budget, but provider pricing, token accounting, and default reasoning modes still matter.</p></div></div></div></section></main>"""
+<main><div class="hero shell"><div><p class="eyebrow">{tr(lang, "hero_eyebrow")}</p>
+<h1>{tr(lang, "hero_title")}</h1>
+<p class="lede">{tr(lang, "hero_lede")}</p>
+<div class="pills"><span class="pill">{tr(lang, "pill_families")}</span><span class="pill">{tr(lang, "pill_tiers")}</span><span class="pill">{tr(lang, "pill_bounds")}</span><span class="pill">{tr(lang, "pill_script")}</span></div></div>
+<img src="{'../' if lang == 'zh' else ''}assets/hero.gif" alt="{tr(lang, 'hero_alt')}"></div>
+<section id="leaderboard"><div class="shell"><div class="section-head"><div><h2>{tr(lang, "leaderboard")}</h2>
+<p class="kicker">{tr(lang, "leaderboard_caption")}</p></div>{buttons}</div>{leaderboard}</div></section>
+<section><div class="shell"><div class="section-head"><div><h2>{tr(lang, "pareto_title")}</h2>
+<p class="kicker">{tr(lang, "pareto_caption")}</p></div></div>{chart}</div></section>
+<section><div class="shell"><div class="section-head"><div><h2>{tr(lang, "caveats_title")}</h2>
+<p class="kicker">{tr(lang, "caveats_caption")}</p></div><a href="method.html">{tr(lang, "method_link")}</a></div>
+<div class="caveats"><div class="card"><b>{tr(lang, "caveat_synthetic")}</b><p>{tr(lang, "caveat_synthetic_text")}</p></div>
+<div class="card"><b>{tr(lang, "caveat_native")}</b><p>{tr(lang, "caveat_native_text")}</p></div>
+<div class="card"><b>{tr(lang, "caveat_cost")}</b><p>{tr(lang, "caveat_cost_text")}</p></div></div></div></section></main>"""
+    prefix = "../" if lang == "zh" else ""
+    en_href = "../index.html?lang=en" if lang == "zh" else "index.html?lang=en"
+    zh_href = "index.html" if lang == "zh" else "zh/index.html"
     (output / "index.html").write_text(
-        page("WSP-Bench Leaderboard", body, preview=preview), encoding="utf-8"
+        page(
+            lang,
+            tr(lang, "index_title"),
+            body,
+            prefix=prefix,
+            en_href=en_href,
+            zh_href=zh_href,
+            preview=preview,
+            auto_redirect=lang == "en",
+        ),
+        encoding="utf-8",
     )
 
 
-def build_method(output: Path, preview: bool) -> None:
-    body = """
-<main class="method narrow"><p class="eyebrow">Rules &amp; method</p><h1>One harness. Exact ground truth.</h1>
-<p class="lede">WSP-Bench measures how well an LLM can investigate and repair controlled weight-space defects without access to the clean checkpoint.</p>
-<h2>Task families</h2><div class="family-grid">
-<div class="card"><b>Behavior injection</b><p>A rank-one edit induces a language switch, capitalization, repetition, or another measurable behavior. Repair it without collateral damage.</p></div>
-<div class="card"><b>Trigger backdoor</b><p>An unknown trigger activates a rank-one key→value edit. Identify the trigger and remove the backdoor.</p></div>
-<div class="card"><b>Localization audit</b><p>A hidden edit appears somewhere in the network. Report the layer, parameter, and direction without editing.</p></div>
-<div class="card"><b>Neuron hijack</b><p>A small group of amplified neurons floods output with one token. Restore normal behavior.</p></div></div>
-<h2>Scoring</h2><p>For edit tasks, repair is measured on hidden prompts and discounted by collateral change on held-out general text. Values are clipped to their stated ranges.</p>
+def build_method(output: Path, lang: str, preview: bool) -> None:
+    body = f"""
+<main class="method narrow"><p class="eyebrow">{tr(lang, "method_eyebrow")}</p><h1>{tr(lang, "method_h1")}</h1>
+<p class="lede">{tr(lang, "method_lede")}</p>
+<h2>{tr(lang, "task_families")}</h2><div class="family-grid">
+<div class="card"><b>{tr(lang, "behavior_name")}</b><p>{tr(lang, "behavior_desc")}</p></div>
+<div class="card"><b>{tr(lang, "backdoor_name")}</b><p>{tr(lang, "backdoor_desc")}</p></div>
+<div class="card"><b>{tr(lang, "audit_name")}</b><p>{tr(lang, "audit_desc")}</p></div>
+<div class="card"><b>{tr(lang, "hijack_name")}</b><p>{tr(lang, "hijack_desc")}</p></div></div>
+<h2>{tr(lang, "scoring")}</h2><p>{tr(lang, "scoring_intro")}</p>
 <div class="formula">repair = clip((bug_rate(broken) − bug_rate(submitted)) / (bug_rate(broken) − bug_rate(clean)), 0, 1)<br>
 instance_score = 100 × repair × (1 − collateral_penalty)</div>
-<p>Collateral penalty is derived from mean per-token KL(clean ∥ submitted) between frozen free and maximum thresholds. Audit tasks use <code>100 × localization</code>, combining layer/parameter identification and absolute cosine similarity to the planted direction. Overall score is the mean of instance scores, with a bootstrap 95% confidence interval over instances.</p>
-<h2>Fairness and anti-leakage</h2><ul>
-<li>Every model receives the same system prompt, text protocol, turn limit, GPU-call limit, edit budget, and dollar cap.</li>
-<li>The Python sandbox has no network and contains only the broken model. The clean checkpoint and ground truth remain in the scoring process.</li>
-<li>Defect direction, strength, layer, and trigger are randomized. Official test specifications and seeds remain private.</li>
-<li>Behavior metrics are rule-based. No LLM judge is used.</li>
-<li>Every run records model ID, provider settings, tokens, dollars, GPU calls, stop reason, and the complete trace.</li>
+<p>{tr(lang, "scoring_detail")}</p>
+<h2>{tr(lang, "fairness")}</h2><ul>
+<li>{tr(lang, "fair_1")}</li>
+<li>{tr(lang, "fair_2")}</li>
+<li>{tr(lang, "fair_3")}</li>
+<li>{tr(lang, "fair_4")}</li>
+<li>{tr(lang, "fair_5")}</li>
 </ul>
-<h2>Budget</h2><p>Each v0.1 instance allows at most <b>40 turns</b>, <b>20 GPU calls</b>, batches of <b>64</b>, generations of <b>128 new tokens</b>, <b>262,144 changed parameters</b>, and <b>$1.50</b> in model API cost. Reaching a limit stops the episode and scores the current submission.</p>
-<h2>Reference rows</h2><ul><li><b>Oracle (100):</b> knows and reverses the planted edit.</li><li><b>No-op (0):</b> submits the broken model unchanged.</li><li><b>Scripted pipeline:</b> a fixed no-LLM interpretability loop. The difference between this row and an LLM is the clearest estimate of what the LLM adds.</li></ul>
-<h2>Interpretation</h2><p>These are synthetic defects designed for exact scoring. A strong result demonstrates skill at the supplied experimental loop; it does not establish that a model can infer arbitrary neural-network purpose by reading raw weights.</p></main>"""
+<h2>{tr(lang, "budget")}</h2><p>{tr(lang, "budget_text")}</p>
+<h2>{tr(lang, "references")}</h2><ul><li>{tr(lang, "ref_oracle")}</li><li>{tr(lang, "ref_noop")}</li><li>{tr(lang, "ref_script")}</li></ul>
+<h2>{tr(lang, "interpretation")}</h2><p>{tr(lang, "interpretation_text")}</p></main>"""
+    prefix = "../" if lang == "zh" else ""
+    en_href = "../method.html?lang=en" if lang == "zh" else "method.html?lang=en"
+    zh_href = "method.html" if lang == "zh" else "zh/method.html"
     (output / "method.html").write_text(
-        page("Rules & Method · WSP-Bench", body, preview=preview), encoding="utf-8"
+        page(
+            lang,
+            tr(lang, "method_title"),
+            body,
+            prefix=prefix,
+            en_href=en_href,
+            zh_href=zh_href,
+            preview=preview,
+        ),
+        encoding="utf-8",
     )
 
 
@@ -530,12 +833,14 @@ def trace_source(result: dict[str, Any], fixtures: bool) -> Path | None:
     return ROOT / "runs" / path
 
 
-def load_trace(result: dict[str, Any], fixtures: bool) -> tuple[list[dict[str, Any]], str]:
+def load_trace(
+    result: dict[str, Any], fixtures: bool, lang: str
+) -> tuple[list[dict[str, Any]], str]:
     path = trace_source(result, fixtures)
     if path is None:
-        return [], "No trace was recorded for this run."
+        return [], tr(lang, "trace_none")
     if not path.exists():
-        return [], f"Trace artifact is not available: {path.name}"
+        return [], tr(lang, "trace_missing", name=path.name)
     turns = []
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
@@ -543,16 +848,16 @@ def load_trace(result: dict[str, Any], fixtures: bool) -> tuple[list[dict[str, A
         try:
             turn = json.loads(line)
         except json.JSONDecodeError as exc:
-            return turns, f"Trace ended at malformed line {number}: {exc}"
+            return turns, tr(lang, "trace_malformed", line=number, error=exc)
         if isinstance(turn, dict):
             turns.append(turn)
     return turns, ""
 
 
-def component_value(components: dict[str, Any], key: str) -> str:
+def component_value(components: dict[str, Any], key: str, lang: str) -> str:
     value = components.get(key)
     if isinstance(value, bool):
-        return "yes" if value else "no"
+        return tr(lang, "yes") if value else tr(lang, "no")
     if value is None:
         return "—"
     if isinstance(value, float):
@@ -560,7 +865,7 @@ def component_value(components: dict[str, Any], key: str) -> str:
     return esc(value)
 
 
-def turn_html(turn: dict[str, Any]) -> str:
+def turn_html(turn: dict[str, Any], lang: str) -> str:
     role = str(turn.get("role", "tool"))
     usage = turn.get("usage") or {}
     usage_total = sum(
@@ -571,25 +876,31 @@ def turn_html(turn: dict[str, Any]) -> str:
     extras = ""
     if reasoning:
         extras += (
-            f"<details><summary>Reasoning</summary><div class=\"content\">{esc(reasoning)}</div></details>"
+            f'<details><summary>{tr(lang, "reasoning")}</summary><div class="content">{esc(reasoning)}</div></details>'
         )
     if code:
-        extras += f"<details open><summary>Executed Python</summary><pre><code>{esc(code)}</code></pre></details>"
+        extras += f'<details open><summary>{tr(lang, "executed_python")}</summary><pre><code>{esc(code)}</code></pre></details>'
     metrics = (
-        f"${float(turn.get('cost_usd', 0) or 0):.4f} · {usage_total:,} tokens · "
-        f"{int(turn.get('gpu_calls_used', 0) or 0)} cumulative GPU calls · "
+        f"${float(turn.get('cost_usd', 0) or 0):.4f} · {usage_total:,} {tr(lang, 'tokens')} · "
+        f"{tr(lang, 'gpu_metric', count=int(turn.get('gpu_calls_used', 0) or 0))} · "
         f"{float(turn.get('wall_s', 0) or 0):.1f}s"
     )
+    role_label = tr(lang, f"role_{role}") if f"role_{role}" in TEXT[lang] else role
+    turn_label = tr(lang, "turn_label", number=int(turn.get("t", 0)))
     return (
-        f'<article class="turn {esc(role)}"><div class="turn-meta">TURN {int(turn.get("t", 0)):02d}</div>'
-        f'<div class="bubble"><div class="role">{esc(role)}</div>'
+        f'<article class="turn {esc(role)}"><div class="turn-meta">{turn_label}</div>'
+        f'<div class="bubble"><div class="role">{esc(role_label)}</div>'
         f'<div class="content">{esc(turn.get("content", ""))}</div>{extras}'
         f'<div class="turn-cost">{metrics}</div></div></article>'
     )
 
 
 def build_traces(
-    results: list[dict[str, Any]], output: Path, fixtures: bool, preview: bool
+    results: list[dict[str, Any]],
+    output: Path,
+    fixtures: bool,
+    lang: str,
+    preview: bool,
 ) -> None:
     for result in results:
         model = str(result.get("model", "unknown"))
@@ -599,59 +910,103 @@ def build_traces(
         instance = str(result.get("instance_id", "instance"))
         destination = output / "runs" / split / slug(model) / f"{safe_instance(instance)}.html"
         destination.parent.mkdir(parents=True, exist_ok=True)
-        turns, error = load_trace(result, fixtures)
+        turns, error = load_trace(result, fixtures, lang)
         components = result.get("components") or {}
         stats = [
-            ("Score", f"{float(result.get('score', 0) or 0):.1f}"),
-            ("Repair", component_value(components, "repair")),
-            ("Collateral", component_value(components, "collateral_penalty")),
-            ("Localization", component_value(components, "localization")),
-            ("Cost", f"${float(result.get('cost_usd', 0) or 0):.3f}"),
-            ("GPU calls", str(int(result.get("gpu_calls", 0) or 0))),
+            (tr(lang, "score"), f"{float(result.get('score', 0) or 0):.1f}"),
+            (tr(lang, "repair"), component_value(components, "repair", lang)),
+            (
+                tr(lang, "collateral"),
+                component_value(components, "collateral_penalty", lang),
+            ),
+            (
+                tr(lang, "localization"),
+                component_value(components, "localization", lang),
+            ),
+            (tr(lang, "cost"), f"${float(result.get('cost_usd', 0) or 0):.3f}"),
+            (tr(lang, "gpu_calls"), str(int(result.get("gpu_calls", 0) or 0))),
         ]
         stat_html = "".join(
             f'<div class="stat"><span>{esc(label)}</span><b>{value}</b></div>'
             for label, value in stats
         )
         if turns:
-            trace_body = "".join(turn_html(turn) for turn in turns)
+            trace_body = "".join(turn_html(turn, lang) for turn in turns)
             if error:
                 trace_body += f'<div class="missing">{esc(error)}</div>'
         else:
             trace_body = f'<div class="missing">{esc(error)}</div>'
+        family = tr(lang, f"family_{result.get('family')}") if result.get("family") in FAMILIES else result.get("family", "")
+        tier = tr(lang, f"tier_{result.get('tier')}") if result.get("tier") in ("easy", "medium", "hard") else result.get("tier", "")
+        stop_reason = str(result.get("stop_reason", "error"))
+        stop_label = tr(lang, f"stop_{stop_reason}") if f"stop_{stop_reason}" in TEXT[lang] else stop_reason
         body = f"""
-<main><div class="trace-head narrow"><p class="eyebrow">{esc(split)} · {esc(result.get("family", ""))} · {esc(result.get("tier", ""))}</p>
+<main><div class="trace-head narrow"><p class="eyebrow">{esc(split)} · {esc(family)} · {esc(tier)}</p>
 <h1>{esc(result.get("display_name") or model)}</h1><p class="lede">{esc(instance)}</p>
 <div class="trace-stats">{stat_html}</div>
-<p class="small muted">Stop: {esc(result.get("stop_reason", "unknown"))} · {int(result.get("turns", len(turns)) or 0)} turns · {float(result.get("wall_s", 0) or 0):.1f}s · harness {esc(result.get("harness_version", "unknown"))}</p></div>
+<p class="small muted">{tr(lang, "stop")}{tr(lang, "label_separator")} {esc(stop_label)} · {int(result.get("turns", len(turns)) or 0)} {tr(lang, "turns")} · {float(result.get("wall_s", 0) or 0):.1f}s · {tr(lang, "harness")} {esc(result.get("harness_version", "unknown"))}</p></div>
 <div class="turns narrow">{trace_body}</div></main>"""
+        rel_path = f"runs/{split}/{slug(model)}/{safe_instance(instance)}.html"
+        if lang == "zh":
+            prefix = "../../../../"
+            en_href = f"../../../../{rel_path}?lang=en"
+            zh_href = destination.name
+        else:
+            prefix = "../../../"
+            en_href = f"{destination.name}?lang=en"
+            zh_href = f"../../../zh/{rel_path}"
         destination.write_text(
             page(
+                lang,
                 f"{result.get('display_name') or model} · {instance}",
                 body,
-                prefix="../../../",
-                description=f"Public WSP-Bench trace for {result.get('display_name') or model} on {instance}.",
+                prefix=prefix,
+                en_href=en_href,
+                zh_href=zh_href,
+                description=tr(
+                    lang,
+                    "trace_description",
+                    model=result.get("display_name") or model,
+                    instance=instance,
+                ),
                 preview=preview,
             ),
             encoding="utf-8",
         )
 
 
-def review_copy(source: Path, destination: Path, label: str, href: str) -> None:
+def review_copy(source: Path, destination: Path, lang: str) -> None:
     text = source.read_text(encoding="utf-8")
     meta = social_meta(
-        "Astra's Qwen Math Weight Edit · Claims vs. Logs",
-        "A factual, claim-by-claim review of Experiment 8 against the authors' public logs.",
+        tr(lang, "review_title"),
+        tr(lang, "review_description"),
     )
-    switch_css = (
-        "<style>.lang-switch{position:fixed;right:18px;top:14px;z-index:20;"
-        "border:1px solid #E2DED3;border-radius:999px;background:#FAF9F5;padding:5px 12px;"
-        "font:12px -apple-system,sans-serif;color:#3D3B36;text-decoration:none}</style>"
-    )
-    text = text.replace("</head>", f"{meta}{switch_css}</head>", 1)
+    header_css = """<style>
+.review-site-header{position:sticky;top:0;z-index:30;border-bottom:1px solid #E2DED3;background:rgba(245,244,238,.94);backdrop-filter:blur(8px)}
+.review-nav{max-width:1160px;height:58px;margin:auto;padding:0 24px;display:flex;align-items:center;gap:25px;font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.review-nav a{color:#3D3B36;text-decoration:none}.review-nav a:hover{color:#D97757}.review-brand{margin-right:auto!important;font:500 21px Georgia,serif!important;color:#141413!important}
+.review-language{display:flex;align-items:center;gap:6px;border-left:1px solid #E2DED3;padding-left:18px}.review-language a.active{color:#D97757;font-weight:700}.review-language span{color:#E2DED3}
+@media(max-width:800px){.review-nav>a:not(.review-brand){display:none}.review-nav{gap:12px}.review-language{padding-left:10px}}
+</style>"""
+    home = "../zh/index.html" if lang == "zh" else "../index.html"
+    method = "../zh/method.html" if lang == "zh" else "../method.html"
+    current = "zh.html" if lang == "zh" else "index.html"
+    en_href = "index.html?lang=en"
+    zh_href = "zh.html"
+    active_en = "active" if lang == "en" else ""
+    active_zh = "active" if lang == "zh" else ""
+    header = f"""<header class="review-site-header"><nav class="review-nav">
+<a class="review-brand" href="{home}">WSP-Bench</a>
+<a href="{home}#leaderboard">{tr(lang, "nav_leaderboard")}</a><a href="{method}">{tr(lang, "nav_method")}</a>
+<a href="{current}">{tr(lang, "nav_review")}</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a>
+<span class="review-language"><a class="{active_en}" data-language="en" href="{en_href}">EN</a><span>/</span><a class="{active_zh}" data-language="zh" href="{zh_href}">中文</a></span>
+</nav></header>"""
+    language_script = """<script>document.querySelectorAll("[data-language]").forEach(link=>link.addEventListener("click",()=>localStorage.setItem("wsp-language",link.dataset.language)));</script>"""
+    text = text.replace("</head>", f"{meta}{header_css}</head>", 1)
     text = text.replace(
-        "<body>", f'<body><a class="lang-switch" href="{href}">{esc(label)}</a>', 1
+        "<body>", f"<body>{header}", 1
     )
+    text = text.replace("</body>", f"{language_script}</body>", 1)
     destination.write_text(text, encoding="utf-8")
 
 
@@ -763,23 +1118,24 @@ def main() -> None:
     results = load_results(args.fixtures)
     validate_results(results)
     copy_assets(output)
-    build_index(results, output, args.fixtures)
-    build_method(output, args.fixtures)
-    build_traces(results, output, args.fixtures, args.fixtures)
+    for lang in ("en", "zh"):
+        lang_output = output if lang == "en" else output / "zh"
+        lang_output.mkdir(parents=True, exist_ok=True)
+        build_index(results, lang_output, lang, args.fixtures)
+        build_method(lang_output, lang, args.fixtures)
+        build_traces(results, lang_output, args.fixtures, lang, args.fixtures)
 
     review_out = output / "review"
     review_out.mkdir(parents=True, exist_ok=True)
     review_copy(
         ROOT / "doc/source_blog_review.en.html",
         review_out / "index.html",
-        "中文",
-        "zh.html",
+        "en",
     )
     review_copy(
         ROOT / "doc/source_blog_review.html",
         review_out / "zh.html",
-        "English",
-        "index.html",
+        "zh",
     )
     print(f"built {len(results)} results into {output.relative_to(ROOT)}")
 

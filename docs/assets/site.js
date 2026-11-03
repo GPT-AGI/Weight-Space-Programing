@@ -29,3 +29,6 @@ document.querySelectorAll("[data-split-button]").forEach(button => {
     });
   });
 });
+document.querySelectorAll("[data-language]").forEach(link => {
+  link.addEventListener("click", () => localStorage.setItem("wsp-language", link.dataset.language));
+});

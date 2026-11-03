@@ -98,7 +98,7 @@
 - [ ] 自我改进：一个跨回合学习的方法库，在留出的缺陷类型上衡量进步
 - [ ] 模型能改进自己的权重吗？分阶段研究，由留出评测把关
 
-规则与评分细节：[gpt-agi.github.io/Weight-Space-Programing/method.html](https://gpt-agi.github.io/Weight-Space-Programing/method.html)
+规则与评分细节：[gpt-agi.github.io/Weight-Space-Programing/zh/method.html](https://gpt-agi.github.io/Weight-Space-Programing/zh/method.html)
 
 ## 致谢
 

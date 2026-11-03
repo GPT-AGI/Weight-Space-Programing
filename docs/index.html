@@ -4,11 +4,33 @@
 <meta property="og:type" content="website"><meta property="og:title" content="WSP-Bench Leaderboard">
 <meta property="og:description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox."><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="WSP-Bench Leaderboard">
-<meta name="twitter:description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox."><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta name="twitter:description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox."><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png"><script>
+(() => {
+  try {
+    const query = new URLSearchParams(location.search);
+    const requested = query.get("lang");
+    if (requested === "en") {
+      localStorage.setItem("wsp-language", "en");
+      return;
+    }
+    if (requested === "zh") {
+      localStorage.setItem("wsp-language", "zh");
+      location.replace("zh/index.html");
+      return;
+    }
+    const stored = localStorage.getItem("wsp-language");
+    if (stored === "zh" || (!stored && navigator.language.toLowerCase().startsWith("zh"))) {
+      if (!stored) localStorage.setItem("wsp-language", "zh");
+      location.replace("zh/index.html");
+    }
+  } catch (_) {}
+})();
+</script>
 <link rel="stylesheet" href="assets/site.css"></head><body>
 <header class="site"><nav class="nav shell"><a class="brand" href="index.html">WSP-Bench</a>
-<a href="index.html#leaderboard">Leaderboard</a><a href="method.html">Rules &amp; method</a>
-<a href="review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a></nav></header>
+<a href="index.html#leaderboard">Leaderboard</a><a href="method.html">Rules & method</a>
+<a href="review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a>
+<span class="language"><a class="active" data-language="en" href="index.html?lang=en">EN</a><span>/</span><a class="" data-language="zh" href="zh/index.html">中文</a></span></nav></header>
 
 <main><div class="hero shell"><div><p class="eyebrow">Weight-space programming, measured</p>
 <h1>Who is the best weight-space programmer?</h1>
@@ -16,11 +38,11 @@
 <div class="pills"><span class="pill">4 defect families</span><span class="pill">3 difficulty tiers</span><span class="pill">Oracle 100 · No-op 0</span><span class="pill">No-LLM baseline</span></div></div>
 <img src="assets/hero.gif" alt="WSP-Bench leaderboard preview"></div>
 <section id="leaderboard"><div class="shell"><div class="section-head"><div><h2>Leaderboard</h2>
-<p class="kicker">Overall score is the mean across instances. Confidence intervals bootstrap instances.</p></div></div><div class="empty"><p class="eyebrow">Results pending</p><h3>Leaderboard launching Nov 6</h3><p>Official runs will appear here with bootstrap confidence intervals, costs, token counts, GPU calls, and full public traces.</p><p class="small muted">Initial model roster</p><ul class="roster"><li>DeepSeek V4.1 Flash</li><li>Qwen3.8 Flash</li><li>GLM-5.3 Flash</li><li>GPT-6 Luna</li><li>Grok 4.1 Fast</li><li>MiniMax M2.7</li><li>Gemini 3.5 Flash-Lite</li></ul></div></div></section>
+<p class="kicker">Overall score is the mean across instances. Confidence intervals bootstrap instances.</p></div></div><div class="empty"><p class="eyebrow">Results pending</p><h3>Leaderboard launching Nov 6</h3><p>Official runs will appear here with bootstrap confidence intervals, costs, token counts, GPU calls, and full public traces.</p><p class="small muted">Initial model roster</p><ul class="roster"><li>DeepSeek V4.1 Flash</li><li>Qwen3.8 Flash</li><li>GLM-5.3 Flash</li><li>MiniMax M2.7</li><li>GPT-6 Luna</li><li>Grok 4.1 Fast</li><li>Gemini 3.5 Flash-Lite</li><li>Scripted baseline</li><li>Oracle</li><li>No-op</li></ul></div></div></section>
 <section><div class="shell"><div class="section-head"><div><h2>Score vs. cost</h2>
 <p class="kicker">Higher and farther left is better. The dashed line marks the model Pareto frontier; cost uses a logarithmic axis.</p></div></div><div class="missing">The score-vs-cost chart will appear when results are available.</div></div></section>
 <section><div class="shell"><div class="section-head"><div><h2>What this does not show</h2>
-<p class="kicker">A benchmark result is evidence about performance under these rules—not a broader metaphysical claim.</p></div><a href="method.html">Read rules &amp; method →</a></div>
+<p class="kicker">A benchmark result is evidence about performance under these rules—not a broader metaphysical claim.</p></div><a href="method.html">Read rules & method →</a></div>
 <div class="caveats"><div class="card"><b>Synthetic defects</b><p>The planted failures are controlled tasks with exact ground truth, not a claim about every real model failure.</p></div>
 <div class="card"><b>Not native “weight reading”</b><p>A high score means the model runs a find-direction → edit → verify loop effectively with the supplied tools.</p></div>
 <div class="card"><b>Cost is part of the result</b><p>Scores share a fixed budget, but provider pricing, token accounting, and default reasoning modes still matter.</p></div></div></div></section></main>
