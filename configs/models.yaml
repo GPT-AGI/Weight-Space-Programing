@@ -1,0 +1,62 @@
+models:
+  # Empty extra_body preserves each provider's default reasoning mode.
+  - id: deepseek/deepseek-v4.1-flash-1017
+    display_name: DeepSeek V4.1 Flash
+    usd_per_m_input: 0.30
+    usd_per_m_output: 1.20
+    usd_per_m_cached: 0.006
+    extra_body: {}
+
+  - id: qwen/qwen3.8-flash
+    display_name: Qwen3.8 Flash
+    usd_per_m_input: 0.11
+    usd_per_m_output: 0.39
+    extra_body: {}
+
+  - id: z-ai/glm-5.3-flash
+    display_name: GLM-5.3 Flash
+    usd_per_m_input: 0.15
+    usd_per_m_output: 0.50
+    extra_body: {}
+
+  - id: minimax/minimax-m2.7
+    display_name: MiniMax M2.7
+    usd_per_m_input: 0.30
+    usd_per_m_output: 1.20
+    extra_body: {}
+
+  - id: openai/gpt-6-luna
+    display_name: GPT-6 Luna
+    usd_per_m_input: 0.10
+    usd_per_m_output: 0.50
+    extra_body: {}
+
+  - id: x-ai/grok-4.1-fast
+    display_name: Grok 4.1 Fast
+    usd_per_m_input: 0.20
+    usd_per_m_output: 0.50
+    extra_body: {}
+
+  - id: google/gemini-3.5-flash-lite
+    display_name: Gemini 3.5 Flash-Lite
+    usd_per_m_input: 0.30
+    usd_per_m_output: 2.50
+    extra_body: {}
+
+  - id: scripted
+    display_name: Scripted baseline
+    usd_per_m_input: 0.0
+    usd_per_m_output: 0.0
+    extra_body: {}
+
+  - id: oracle
+    display_name: Oracle
+    usd_per_m_input: 0.0
+    usd_per_m_output: 0.0
+    extra_body: {}
+
+  - id: noop
+    display_name: No-op
+    usd_per_m_input: 0.0
+    usd_per_m_output: 0.0
+    extra_body: {}

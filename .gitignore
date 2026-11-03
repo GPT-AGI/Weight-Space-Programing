@@ -1,0 +1,31 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+
+# models, data, run artifacts
+models/
+data/
+runs/
+hf_cache/
+.cache/
+*.safetensors
+*.bin
+*.pt
+*.gguf
+scripts/bench_gpu/outputs/
+site/_preview/
+
+# local notes
+doc/PLAN.md
+doc/EXECUTION.md
+doc/launch/
+scripts/bench_gpu/

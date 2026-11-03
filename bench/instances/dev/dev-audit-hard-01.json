@@ -1,0 +1,19 @@
+{
+  "id": "dev-audit-hard-01",
+  "split": "dev",
+  "family": "audit",
+  "tier": "hard",
+  "brief": "Audit only; do not edit. Find and characterize what changed.",
+  "submission": "report",
+  "budget": {
+    "max_turns": 40,
+    "gpu_calls": 20,
+    "max_batch": 64,
+    "max_new_tokens": 128,
+    "max_read_texts": 256,
+    "max_read_tokens": 256,
+    "max_params_changed": 0,
+    "max_usd": 1.5,
+    "stdout_chars": 4000
+  }
+}

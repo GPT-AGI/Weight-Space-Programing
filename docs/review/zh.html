@@ -1,0 +1,151 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Astra 改权重提升 Qwen3.5-0.8B 数学：博客说法与公开日志对照</title><style>
+    :root{--bg:#F5F4EE;--paper:#FAF9F5;--ink:#141413;--accent:#D97757;--green:#6A8F6B;--gray:#8A867D;--soft:#3D3B36;--line:#E2DED3;--beige:#EFE9DC}
+    *{box-sizing:border-box}html{background:var(--bg)}
+    body{margin:0;color:var(--ink);font:16.5px/1.75 -apple-system,"PingFang SC","Helvetica Neue","Hiragino Sans GB",sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:820px;margin:0 auto;padding:64px 32px 8px}
+    h1,h2,.insight,.num b{font-family:"Tiempos Headline",Georgia,"Songti SC","Noto Serif SC",serif;font-weight:500}
+    .eyebrow{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+    h1{font-size:40px;line-height:1.25;margin:0 0 16px}.sub{color:var(--gray);font-size:15.5px;margin:0}
+    hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+    .nums{display:grid;grid-template-columns:repeat(4,1fr)}.num{padding:0 18px;border-left:1px solid var(--line)}.num:first-child{padding-left:0;border-left:0}
+    .num b{display:block;font-size:32px;line-height:1.15;white-space:nowrap}.num b em{font-style:normal;color:var(--accent)}
+    .num span{display:block;margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--gray)}
+    sup.t{font-family:-apple-system,sans-serif;font-size:11px;color:var(--accent);margin-left:2px;font-weight:600}
+    h2{font-size:25px;margin:0 0 4px}.kind{font-size:13px;color:var(--gray);margin:0 0 18px}
+    ol.tldr{list-style:none;counter-reset:t;padding:0;margin:0}ol.tldr li{counter-increment:t;position:relative;padding-left:40px;margin:0 0 16px}
+    ol.tldr li::before{content:counter(t);position:absolute;left:0;top:-2px;font-family:Georgia,serif;font-size:24px;color:var(--accent)}
+    ol.tldr strong{font-weight:600}ol.tldr span{color:var(--soft)}
+    .viewer-wrap{max-width:1200px;margin:8px auto 0;padding:0 24px}
+    .vhead{max-width:820px;margin:0 auto 18px;padding:0 8px}
+    .viewer{display:grid;grid-template-columns:260px 1fr;border:1px solid var(--line);border-radius:10px;background:var(--paper);overflow:hidden}
+    .vtop{grid-column:1/3;display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg)}
+    .vtop b{font-family:Georgia,"Songti SC",serif;font-weight:500;font-size:17px}.vtop .cnt{color:var(--gray);font-size:13px}
+    .vtop button{margin-left:auto;font:13px -apple-system,sans-serif;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 14px;color:var(--soft);cursor:pointer}
+    .toc{border-right:1px solid var(--line);padding:10px 0;background:var(--bg);font-size:13px}
+    .toc .tt{padding:0 14px 8px;color:var(--gray);font-size:12px;display:flex;justify-content:space-between}
+    .toc a{display:block;padding:7px 14px 7px 12px;border-left:3px solid transparent;color:var(--ink);text-decoration:none;line-height:1.45}
+    .toc a:hover{background:var(--beige)}.toc a small{display:block;color:var(--gray);font-size:12px}
+    .toc .no{font-family:ui-monospace,Menlo,monospace;color:var(--gray);margin-right:6px;font-size:11.5px}
+    .toc a.r-system{border-left-color:var(--gray)}.toc a.r-user{border-left-color:var(--accent)}.toc a.r-assistant{border-left-color:var(--green)}.toc a.r-tool,.toc a.r-eval{border-left-color:#CFC6B2}.toc a.r-process{border-left-color:var(--line)}
+    .toc .rl{font-weight:600;font-size:11.5px;letter-spacing:.04em}
+    .toc a.r-user .rl{color:var(--accent)}.toc a.r-assistant .rl{color:var(--green)}
+    .flow{padding:14px 18px 18px}
+    .row{display:grid;grid-template-columns:1fr 230px;gap:18px;margin:0 0 12px;scroll-margin-top:12px}
+    .msg{border:1px solid var(--line);border-left:3px solid var(--gray);border-radius:8px;background:#fff;padding:10px 16px 12px}
+    .msg.r-user{border-left-color:var(--accent)}.msg.r-assistant{border-left-color:var(--green)}
+    .msg.r-tool,.msg.r-eval{border:1px dashed #CFC6B2;background:var(--paper)}
+    .mh{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+    .mh b{color:var(--ink);font-weight:600;letter-spacing:.03em}.r-user .mh b{color:var(--accent)}.r-assistant .mh b{color:var(--green)}
+    .mtag{font-family:-apple-system,sans-serif;font-size:11px;border:1px solid var(--line);border-radius:3px;padding:0 5px;color:var(--gray)}
+    .mh .src{margin-left:auto;font-family:-apple-system,sans-serif;font-size:11.5px}
+    blockquote{margin:2px 0 0;font-family:"Tiempos Text",Georgia,serif;font-style:italic;font-size:16.5px;line-height:1.6}
+    .zh{margin:6px 0 0;font-size:14px;color:var(--soft)}.sum{margin:0;font-size:14.5px}.exq{margin:4px 0 0;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--soft)}
+    .tool{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--soft)}
+    details.full summary{font-size:12.5px;color:var(--accent);cursor:pointer;margin-top:6px}
+    details.full pre{white-space:pre-wrap;font-size:12px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px;max-height:320px;overflow:auto}
+    details.proc{border:1px dashed #CFC6B2;border-radius:8px;background:var(--beige);padding:8px 14px}
+    details.proc summary{cursor:pointer;font-size:13px;color:var(--soft);font-family:ui-monospace,Menlo,"PingFang SC",monospace}
+    .procbody{margin-top:8px}.snip{margin:6px 0;padding:6px 10px;background:var(--paper);border-radius:6px}
+    .snip .sl{display:block;font-size:11px;color:var(--gray)}.snip code{font-family:ui-monospace,Menlo,"PingFang SC",monospace;font-size:12.5px;color:var(--ink);white-space:pre-wrap}
+    aside.ours{font-size:12.5px;line-height:1.6;color:var(--soft);padding-top:8px}
+    aside.ours span{display:block;font-size:10.5px;letter-spacing:.1em;color:var(--accent);margin-bottom:2px}
+    .env{display:grid;grid-template-columns:1fr 230px;gap:18px;margin:0 0 14px;padding:12px 16px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:13px;line-height:1.7;color:var(--soft)}
+    .env code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--beige);padding:0 4px;border-radius:3px}
+    .envl{display:block;font-size:11px;letter-spacing:.06em;color:var(--gray);margin-bottom:2px}.env aside.ours{padding-top:0}
+    .lab{display:inline-block;font-size:10.5px;letter-spacing:.06em;border-radius:3px;padding:0 6px;margin-right:6px;vertical-align:1px;font-weight:500}
+    .blogl{color:#5B6B7A;border:1px solid #C9D0D6}.oursl{color:var(--accent);border:1px solid #EBC3B3}.authl{color:var(--gray);border:1px solid var(--line);background:var(--beige)}
+    table.vs{width:100%;border-collapse:collapse;font-size:14px;line-height:1.65;margin:4px 0 14px}
+    table.vs th{text-align:left;font-weight:600;font-size:13px;padding:8px 10px;border-bottom:1.5px solid var(--ink)}
+    table.vs td{vertical-align:top;padding:12px 10px;border-bottom:1px solid var(--line)}
+    table.vs td:first-child{width:36%}
+    .blogq{font-family:"Tiempos Text",Georgia,serif;font-size:15px;color:#3F4A54;border-left:2px dotted #9AA7B2;padding-left:10px;display:block}
+    table.vs q{font-family:Georgia,serif;color:#3F4A54;quotes:"“" "”"}
+    table.vs .zht{font-family:-apple-system,"PingFang SC","Hiragino Sans GB",sans-serif;font-size:12.5px;line-height:1.6;color:var(--gray)}.blogq .zht{display:block;margin-top:3px}
+    table.vs code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--beige);padding:0 4px;border-radius:3px}
+    .verdict{font-size:15px;line-height:1.7;margin:6px 0 0;padding:12px 16px;border-left:2px solid var(--accent);background:var(--paper)}
+    ul.hx{list-style:none;padding:0;margin:0 0 6px;border:1px solid var(--line);border-radius:8px;background:var(--beige)}
+    ul.hx li{padding:10px 16px;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.65}ul.hx li:last-child{border-bottom:0}
+    ul.hx b{display:block;font-weight:600}ul.hx span{color:var(--soft)}ul.hx code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+    .insight{font-size:22px;line-height:1.6;margin:0}
+    footer{max-width:820px;margin:36px auto 0;padding:16px 32px 48px;border-top:1px solid var(--line);font-size:12px;line-height:1.75;color:var(--gray)}
+    footer a{color:var(--gray)}footer p{margin:0 0 6px}
+    @media (max-width:980px){.viewer{grid-template-columns:1fr}.toc{display:none}.row{grid-template-columns:1fr}.nums{grid-template-columns:1fr 1fr;row-gap:24px}}
+    </style><meta name="description" content="A factual, claim-by-claim review of Experiment 8 against the authors&#x27; public logs.">
+<meta property="og:type" content="website"><meta property="og:title" content="Astra&#x27;s Qwen Math Weight Edit · Claims vs. Logs">
+<meta property="og:description" content="A factual, claim-by-claim review of Experiment 8 against the authors&#x27; public logs."><meta property="og:image" content="https://gpt-agi.github.io/weight-space-programing/assets/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Astra&#x27;s Qwen Math Weight Edit · Claims vs. Logs">
+<meta name="twitter:description" content="A factual, claim-by-claim review of Experiment 8 against the authors&#x27; public logs."><meta name="twitter:image" content="https://gpt-agi.github.io/weight-space-programing/assets/og.png"><style>.lang-switch{position:fixed;right:18px;top:14px;z-index:20;border:1px solid #E2DED3;border-radius:999px;background:#FAF9F5;padding:5px 12px;font:12px -apple-system,sans-serif;color:#3D3B36;text-decoration:none}</style></head><body><a class="lang-switch" href="index.html">English</a>
+    <div class="wrap">
+    <p class="eyebrow">Weight-space programming · 实验 8 解读</p>
+    <h1>Astra 改权重提升 Qwen3.5-0.8B 数学：<br>博客说法与公开日志对照</h1>
+    <p class="sub">依据：原作者公开的完整实验日志。英文引文均逐字取自 Astra 自己的回复；博客、README 和用户消息里的说明不作为 Astra 的言行。</p>
+    <hr>
+    <div class="nums">
+     <div class="num"><b>7.9<em>→</em>48.1%<sup class="t">①</sup></b><span>MATH-500 准确率，最好的一次运行（每题 4 次采样）</span></div>
+     <div class="num"><b>50<em> 次</em></b><span>GPU 前向：Astra 实际跑模型生成答案、读取内部激活；问题是从运行结果里观察出来的</span></div>
+     <div class="num"><b>131,072<sup class="t">①</sup></b><span>改动的参数：第 15、19 层 MLP 各 64 列</span></div>
+     <div class="num"><b>7<em>→</em>65%<sup class="t">①</sup></b><span>MATH-500 答完率；答完的答案中正确率 93% → 71%</span></div>
+    </div>
+    <hr>
+    <h2 style="margin-bottom:18px">TL;DR</h2>
+    <ol class="tldr">
+     <li><strong>Astra 是在一个工具齐全的“可解释性实验室”里做实验，不是盯着权重顿悟。</strong><span>作者给了 Astra 能跑模型、记录模型内部激活、做 A/B 对比的工具和 50 次实验机会；Astra 是一步步试出结果的，第一个猜测还错了。</span></li>
+     <li><strong>问题是靠跑模型、看激活找到的，修法是一个标准的数学投影公式。</strong><span>Astra 对比“正常推理”和“卡死循环”时模型内部的差别，找到一个“循环方向”，再用公式把这个方向从两层里减掉。</span></li>
+     <li><strong>“6 倍”主要来自不再卡死、把题答完，而不是数学变聪明。</strong><span>原模型 93% 的答案写满长度上限；编辑后答完率 7% → 65%，而答完的题里正确率反而从 93% 降到 71%<sup class="t">①</sup>。</span></li>
+    </ol>
+    <hr>
+    <h2>博客说法逐条对照</h2>
+    <p class="kind">左栏逐字摘自博客（2026-11-03 抓取）；右栏是对照公开日志核实的结果。本页只分析实验 8（数学）；博客里“只看权重就能判断网络训练目的”是实验 1，不在本页范围内。</p>
+    <table class="vs"><thead><tr><th>宣传说法 <span class="lab blogl">博客原文</span></th><th>日志里实际发生的</th></tr></thead><tbody>
+    <tr><td><span class="blogq">“Astra identifies an issue in its weights causing reasoning loops”<span class="zht">Astra 在 Qwen 模型的权重中找到了导致推理循环的问题</span></span></td><td>Qwen3.5-0.8B 这个小模型做数学题的毛病是“推理循环”：思考时反复写同一段话，直到写满长度上限也给不出答案。这个毛病是 Astra 用 GPU 前向工具把模型<b>实际跑起来</b>，对比模型处理“正常 vs 循环”文本时的内部激活，从运行结果里观察出来的，不是只读权重看出来的。</td></tr><tr><td><span class="blogq">“fixes this by natively editing 0.016% of the weights”<span class="zht">通过原生编辑 0.016% 的权重修复了这个问题</span></span></td><td>在 Python 里用公式 <code>W ← W − α·u·uᵀW</code> 把一个“循环方向”从第 15、19 层 MLP 的输出里减掉，只动每层 64 列，共 2 × 64 × 1,024 = <b>131,072</b> 个参数<sup class='t'>①</sup>。占比是多少取决于拿哪个参数总量当分母；这个数字主要反映“只改两层、每层 64 列”的形状，不是精准度的证明。博客正文自己也写了：<q>much like removing a behavior by deleting a single direction from a model’s weights</q>（与 2024 年 refusal direction 消融同一类做法）。</td></tr><tr><td><span class="blogq">“this weight correction raises MATH-500 from 7.9% to 48.1%”<span class="zht">这次权重修正将 MATH-500 从 7.9% 提升到 48.1%</span></span></td><td>数字属实：7.9% → 48.1%<sup class='t'>①</sup>。但答完率 7% → 65%，答完的题里正确率 93% → 71%<sup class='t'>①</sup>：提升来自“不再卡死”。</td></tr><tr><td><span class="blogq">“generalizes out of the box to instruction following, raising IFEval by 3x”<span class="zht">开箱即可泛化到指令跟随，将 IFEval 提升到 3 倍</span></span></td><td>数字属实：21.0 → 62.3<sup class='t'>①</sup>。博客正文自己写：<q>The loops are not special to math, so performance beyond math improved as well</q>。这是修好循环这个通用缺陷的结果，不是学会了指令跟随的新能力。</td></tr><tr><td><span class="blogq">“asked to make Qwen3.5-0.8B better at math without gradients”<span class="zht">被要求在不使用梯度的情况下让 Qwen3.5-0.8B 更擅长数学</span></span></td><td>属实。但均值差方向、方向消融这类方法本来就不需要梯度；Astra 用了 50 次 GPU 前向（跑模型生成答案、读取内部激活）做实验。</td></tr><tr><td><span class="blogq">“well past what we’d expect from humans or conventional algorithms”<span class="zht">远超我们对人类或传统算法的预期</span></span></td><td>实验 8 用到的每一步都是 2022–2024 年人类研究者的标准做法：均值差方向、直接归因、方向消融、剂量-反应、随机对照、冻结后留出验证。</td></tr>
+    </tbody></table>
+    <p class="verdict">“原生读写权重”更准确的说法是：在工具齐全的实验环境里，熟练地跑完一套标准可解释性流程，再用代码把一个投影公式写进权重。<b>读</b>靠的是激活和实验，<b>写</b>靠的是公式和代码。</p>
+    <hr>
+    <h2>作者的 harness 给了 Astra 什么</h2>
+    <p class="kind"><span class="lab authl">原作者说明</span>来源：exp8 README、p50c 第 1 轮 prompt.txt、日志仓库 harness 目录；每个数字都在原文中核对过。</p>
+    <ul class="hx"><li><b>持久的 Python 环境（CPU）</b><span>可以读写模型的任意权重，用 <code>save_edit</code> 保存改动，最多运行 300 次代码。</span></li><li><b>GPU 上的前向工具，预算 10 / 25 / 50 次</b><span>一次生成最多 512 个答案；“both”模式下原版与编辑版各 256 个答案同题同种子对比，直接返回准确率差、标准误和截断比例。</span></li><li><b>一次读取最多 1,024 段文本</b><span>每段最长 32,768 token，返回逐 token 的 log-prob、隐状态、MLP 激活和注意力。</span></li><li><b>15,458 道带答案的练习题</b><span>GSM8K 7,469 道、MATH 7,275 道、AIME 714 道。</span></li><li><b>笔记、交接与护栏</b><span>要求随时更新 notes.md；每 40 轮或重启时开新会话，把任务、笔记和当前编辑交接过去；<code>save_edit</code> 会拒收改最终归一化层、嵌入/输出层或整张量乘常数这类改法。</span></li></ul>
+    <p class="verdict">这相当于给了 Astra 一套完整的机制可解释性实验台：能记录模型内部激活，能做同题同种子的 A/B 评测，还有一个持久的分析环境。</p>
+    <hr>
+    </div>
+    <div class="viewer-wrap">
+     <div class="vhead"><h2>真实轨迹（节选）</h2><p class="kind">把一次运行的 158 轮压成 15 条。绿色 = Astra 原文（斜体，逐字）；橙色 = 用户消息；虚线 = 工具 / 评测输出；右侧小字 = 解读。</p></div>
+    
+     <div class="env"><div class="envtxt"><span class="envl">运行环境 · 原作者说明（exp8 README 与各轮 run.json），非 Astra 言行</span>
+      Astra（<code>gpt-6-astra</code>）通过 Codex CLI 运行：每轮一次 <code>codex exec --json</code>，reasoning effort <code>max</code>，上下文窗口 872k；但 <b>Codex 自带工具全部关闭</b>（本运行 158 轮的 run.json 均为 <code>tool_free: true</code>）。每轮 Astra 只回复一个代码块或前向请求，由作者自写的 harness 执行（CPU 上的 Python kernel、GPU 上的前向工具），结果作为下一条用户消息发回；每 40 轮或 harness 重启时开新会话（handoff：任务 + Astra 的笔记 + 当前编辑）；没有输出推理摘要。</div>
+      <aside class="ours">所以这是“模型 + 自建工具循环”的传统 agent 框架，不是 Codex 的自动编码能力。</aside></div>
+     <div class="viewer">
+      <div class="vtop"><b>Astra · 实验 8 · 运行 p50c（节选）</b><span class="cnt">158 轮 · 50 次前向 · 节选 15 条</span><button onclick="document.querySelectorAll('details.proc').forEach(d=>d.open=!this.dataset.o);this.dataset.o=this.dataset.o?'':'1';this.textContent=this.dataset.o?'全部收起':'全部展开'">全部展开</button></div>
+      <nav class="toc"><div class="tt"><span>消息目录</span><span>15 条</span></div><a href="#m0" class="r-system"><span class="no">001</span><span class="rl">SYSTEM</span><small>任务：直接编辑 Qwen3.5-0.8B 的权重，提升数学</small></a><a href="#m1" class="r-process"><span class="no">002–028</span><span class="rl">过程</span><small>过程 · 28 轮 · 只有代码、无解释</small></a><a href="#m2" class="r-user"><span class="no">029</span><span class="rl">USER</span><small>用户：从现在起每步先解释</small></a><a href="#m3" class="r-assistant"><span class="no">029</span><span class="rl">ASSISTANT</span><small>不显著就不下结论，改测两层</small></a><a href="#m4" class="r-process"><span class="no">030–044</span><span class="rl">过程</span><small>过程 · 复用同一组题的探索</small></a><a href="#m5" class="r-assistant"><span class="no">045</span><span class="rl">ASSISTANT</span><small>用从未见过的 128 题验证</small></a><a href="#m6" class="r-tool"><span class="no">046</span><span class="rl">TOOL</span><small>新题配对提升 +24.2 ± 4.0</small></a><a href="#m7" class="r-assistant"><span class="no">051</span><span class="rl">ASSISTANT</span><small>加大强度：有效，但有代价</small></a><a href="#m8" class="r-process"><span class="no">052–091</span><span class="rl">过程</span><small>过程 · 剂量探针与随机对照准备</small></a><a href="#m9" class="r-assistant"><span class="no">092</span><span class="rl">ASSISTANT</span><small>随机方向对照：无效</small></a><a href="#m10" class="r-process"><span class="no">093–109</span><span class="rl">过程</span><small>过程 · 收窄到少数神经元</small></a><a href="#m11" class="r-assistant"><span class="no">110</span><span class="rl">ASSISTANT</span><small>冻结候选，不再加码</small></a><a href="#m12" class="r-process"><span class="no">111–157</span><span class="rl">过程</span><small>过程 · 冻结后在留出题上确认</small></a><a href="#m13" class="r-assistant"><span class="no">158</span><span class="rl">ASSISTANT</span><small>最终提交：两层各 64 列</small></a><a href="#m14" class="r-eval"><span class="no">—</span><span class="rl">EVAL</span><small>独立评测：MATH-500 7.9 → 48.1</small></a></nav>
+      <div class="flow"><div class="row" id="m0"><div class="msg r-system"><div class="mh"><span class="no">001</span> ▾ <b>SYSTEM</b><span class="mtag">用户 prompt · 摘要</span><span class="src">p50c · 第 1 轮 · prompt.txt</span></div><p class="sum">（摘要，非原文）编辑者拿到模型权重、一个只读写权重的 CPU 内核和 1.4 万道带答案的练习题；可以申请 50 次前向（生成或 teacher-forced 读取）；禁止梯度下降、禁止在内核里模拟网络；最后在 MATH-500、GSM8K 上评测。原文要求：</p><p class="exq">“Your job is to make it better at mathematics by EDITING ITS WEIGHTS DIRECTLY”</p></div><aside class="ours">任务 prompt 明确把“全局变锐/变平、无条件提前结束思考”排除在外，所以“只让答案变短”不算数。</aside></div><div class="row" id="m1"><details class="proc"><summary><span class="no">002–028</span> 过程 · 28 轮 · 只有代码、没有解释 · Python × 20、前向请求 × 8（计数 6 次）</summary><div class="procbody"><div class="snip"><span class="sl">Astra 代码注释 · p50c · 第 1 轮</span><code># Hypothesis: math failures may concentrate in repetitive reasoning driven by a small set of late-layer MLP features</code></div><div class="snip"><span class="sl">工具输出 · 前向 1</span><code>原模型 96 题：11 题答对，85 题写满 32,768 token 上限</code></div><div class="snip"><span class="sl">Astra 代码注释 · p50c · 第 4 轮</span><code># Hypothesis: recurring lexical loops share a residual/MLP direction distinct from useful mathematical reasoning, allowing a selective repair.</code></div><div class="snip"><span class="sl">Astra 写的探针文本 · p50c · 第 6 轮</span><code>But is 20 the total? No, it is the remaining time. But is 20 the total? No, it is the remaining time.</code></div><div class="snip"><span class="sl">Astra 代码注释 · p50c · 第 8 轮</span><code># Hypothesis: neurons that preferentially write the loop direction, rather than merely correlating with answer correctness, are causal candidates.</code></div><div class="snip"><span class="sl">工具输出 · 前向 4</span><code>消融单个神经元（第一个候选）：配对提升 +6.2 ± 4.3 个百分点（32 题），不显著</code></div></div></details><aside class="ours">这 28 轮没有任何文字解释（第 29 轮的用户消息才要求解释），只能从代码和输出还原：Astra 自己写“有效 vs 循环”的配对文本取均值差方向（表征工程），再按写入量给神经元排序（直接归因），第一个单神经元候选不显著。</aside></div><div class="row" id="m2"><div class="msg r-user"><div class="mh"><span class="no">029</span> ▾ <b>USER · 用户</b><span class="mtag">用户消息</span><span class="src">p50c · 第 29 轮 · prompt.txt</span></div><p class="exq">“EXPLAIN EVERY STEP. In every reply, before your code or forward block, explain in plain English (about 3 to 8 sentences) …”</p></div><aside class="ours">之后的“解释”是被要求写的，但文字出自 Astra 本人。</aside></div><div class="row" id="m3"><div class="msg r-assistant"><div class="mh"><span class="no">029</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 29 轮 · events.jsonl</span></div><blockquote>Removing the repetition direction from layer 19’s MLP improved accuracy by 9.4 percentage points, but the 6.9-point standard error makes that result inconclusive. … A larger accuracy gain—not just shorter answers—would support the proposed mechanism.</blockquote><p class="zh">从第 19 层 MLP 去掉重复方向让准确率提高 9.4 个百分点，但标准误 6.9，结论不确定……只有准确率明显提高（而不只是答案变短）才支持这个机制。</p></div><aside class="ours">方向消融（类似 refusal direction 的权重正交化）。Astra 把“变短”和“变好”分开看。</aside></div><div class="row" id="m4"><details class="proc"><summary><span class="no">030–044</span> 过程 · 15 轮 · Python × 9、前向请求 × 6（计数 3 次，因缺少解释被退回 6 次）</summary><div class="procbody"><div class="snip"><span class="sl">用户消息 · harness 自动生成 · p50c · 第 31 轮</span><code>[note: the harness was restarted, so your kernel restarted too and its variables are gone]</code></div><div class="snip"><span class="sl">工具输出 · 前向 8</span><code>两层一起去掉重复方向：配对提升 +15.6 ± 6.5（32 题，与此前同一组题）</code></div><div class="snip"><span class="sl">Astra 原文 · p50c · 第 43 轮</span><code>all six comparisons reused the same problems, so that gain is exploratory rather than confirmed.</code></div></div></details><aside class="ours">Astra 自己指出这些结果复用了同一组题，只能算探索。</aside></div><div class="row" id="m5"><div class="msg r-assistant"><div class="mh"><span class="no">045</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 45 轮 · events.jsonl</span></div><blockquote>The saved diagnostic pairs contrast productive mathematical checking with repeated reconsideration of facts already established. … the validation set contains 64 GSM8K and 64 MATH problems absent from all earlier generations.</blockquote><p class="zh">保存的诊断配对把“有效的数学检查”与“反复重新考虑已确定的事实”对比……验证集是 64 道 GSM8K 和 64 道 MATH，都没在之前的生成里出现过。</p></div><aside class="ours">均值差方向 + 留出验证，都是标准做法。</aside></div><div class="row" id="m6"><div class="msg r-tool"><div class="mh"><span class="no">046</span> ▾ <b>TOOL · 工具输出</b><span class="mtag">工具输出 · 非 Astra 所说</span><span class="src">前向 10 · requests/fwd_13.done.json</span></div><p class="tool">Forward pass 10 · generate · both · 128 道新题：编辑模型 − 原模型 = +24.2 ± 4.0 个百分点（同题同种子配对）</p></div><aside class="ours">第一次在独立题目上看到显著提升。同一条用户消息里还附有关于前向预算的说明。</aside></div><div class="row" id="m7"><div class="msg r-assistant"><div class="mh"><span class="no">051</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 51 轮 · events.jsonl</span></div><blockquote>Strength two improved accuracy by 24.6 ± 4.0 percentage points within its paired run, with 64 rescues and one regression. … It also produced more finished wrong answers, so stronger suppression has a real tradeoff rather than simply solving every loop.</blockquote><p class="zh">强度 2 在同一次配对中把准确率提高 24.6 ± 4.0 个百分点，救回 64 题、退步 1 题……但“答完却答错”也变多了，加强抑制有真实代价，并不能解决所有循环。</p></div><aside class="ours">剂量-反应，并主动报告副作用。</aside></div><div class="row" id="m8"><details class="proc"><summary><span class="no">052–091</span> 过程 · 40 轮 · Python × 21、前向请求 × 19（计数 11 次，启动失败不计 8 次）</summary><div class="procbody"><div class="snip"><span class="sl">工具输出 · 前向 20</span><code>强度 3：配对提升 +39.8 ± 3.8（128 题）</code></div><div class="snip"><span class="sl">Astra 代码注释 · p50c · 第 88 轮</span><code># Hypothesis: a norm-matched random-direction edit will not reproduce the repetition-specific effect</code></div><div class="snip"><span class="sl">Astra 原文 · p50c · 第 91 轮</span><code>The negative control did not reproduce the effect: repeated-continuation log probability rose slightly (+0.010), whereas the targeted edit reduced it by 0.104.</code></div></div></details><aside class="ours">先用不消耗生成预算的 teacher-forced 读数看选择性，再花生成预算测准确率。</aside></div><div class="row" id="m9"><div class="msg r-assistant"><div class="mh"><span class="no">092</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 92 轮 · events.jsonl</span></div><blockquote>The random control produced only a 1.56-point paired accuracy change, smaller than its 3.52-point standard error, and did not reduce cutoffs. … Together with the dense probe, this argues against edit magnitude alone explaining the targeted gains.</blockquote><p class="zh">随机对照只带来 1.56 个百分点的配对变化，小于标准误 3.52，也没有减少截断……这说明提升不是“改动幅度本身”带来的。</p></div><aside class="ours">范数匹配的随机方向对照，好论文才会做的一步。</aside></div><div class="row" id="m10"><details class="proc"><summary><span class="no">093–109</span> 过程 · 17 轮 · Python × 7、前向请求 × 10（计数 7 次）</summary><div class="procbody"><div class="snip"><span class="sl">Astra 原文 · p50c · 第 101 轮</span><code>The 64-neuron edit retains substantial selectivity: repeated-continuation likelihood falls by 0.065 nats/token, while productive reasoning changes by only −0.005.</code></div></div></details><aside class="ours">只改写入重复方向最多的少数神经元，效果保留、改动更小。</aside></div><div class="row" id="m11"><div class="msg r-assistant"><div class="mh"><span class="no">110</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 110 轮 · events.jsonl</span></div><blockquote>the 64-neuron strength-6 edit improved accuracy from 7/64 to 35/64, a gain of 43.75 percentage points with a 6.63-point standard error. … I won’t increase the strength further before learning whether this gain generalizes.</blockquote><p class="zh">64 个神经元、强度 6 的编辑把准确率从 7/64 提到 35/64，提升 43.75 个百分点，标准误 6.63……在确认能泛化之前，不再继续加大强度。</p></div><aside class="ours">先冻结，再验证；不在噪声上继续调参。</aside></div><div class="row" id="m12"><details class="proc"><summary><span class="no">111–157</span> 过程 · 47 轮 · Python × 23、前向请求 × 24（计数 20 次）· 权重不再改动</summary><div class="procbody"><div class="snip"><span class="sl">工具输出 · 前向 31–50 中 17 批</span><code>每批 64 题的配对提升在 +39.1 到 +57.8 个百分点之间</code></div><div class="snip"><span class="sl">Astra 原文 · p50c · 第 123 轮</span><code>The audit confirms that only 64 MLP output columns in each of layers 15 and 19 changed; the edit is directional, not whole-tensor scaling.</code></div></div></details><aside class="ours">冻结后的确认阶段，每批结果都由实验系统给出（不是 Astra 自报）。</aside></div><div class="row" id="m13"><div class="msg r-assistant"><div class="mh"><span class="no">158</span> ▾ <b>ASSISTANT · Astra</b><span class="src">p50c · 第 158 轮 · events.jsonl（最终提交）</span></div><blockquote>All 696 edited correct outputs closed their thinking, with a median length of 9,172 tokens—evidence against simply forcing early termination. … These are practice results, not unseen benchmark scores; mathematical errors, missing boxes, and some degeneration remain.</blockquote><p class="zh">编辑后 696 个答对的答案都正常结束了思考，中位长度 9,172 token，说明不是强行提前结束……这些是练习题结果，不是未见过的基准分数；仍有数学错误、缺少答案框和一些退化。</p><details class="full"><summary>显示完整（最终回复原文）</summary><pre>## Final choice
+    
+    Retained the frozen edits in `/work/edited`, changing only **64 MLP output columns each in layers 15 and 19**—131,072 weight values total. The edits counteract measured repetition directions; embeddings, output head, and final norm remain untouched.
+    
+    ## Diagnosis and evidence
+    
+    The dominant failure was repetitive thinking that exhausted the token budget. Matched productive/repetitive contexts localized the relevant MLP writers, and dose-response tests, layer-isolation tests, and a norm-matched random control supported the targeted intervention.
+    
+    **Independent paired confirmation: 1,152 held-out practice problems**
+    
+    | Source | Original | Edited |
+    |---|---:|---:|
+    | GSM8K practice | 11.6% | **70.8%** |
+    | MATH practice | 9.5% | **50.0%** |
+    | Combined | 10.6% | **60.4%** |
+    
+    The combined gain was **49.8 percentage points, SE 1.5**, with **579 rescues and five regressions**. Of those rescues, 576 were originally truncated outputs, while aggregate accuracy on originally finished outputs was unchanged. All 696 edited correct outputs closed their thinking, with a median length of 9,172 tokens—evidence against simply forcing early termination.
+    
+    These are practice results, not unseen benchmark scores; mathematical errors, missing boxes, and some degeneration remain.
+    
+    **Evidence:** `/work/final_report.md`  
+    **Exact neuron indices and hashes:** `/work/frozen_weights_manifest.json`</pre></details></div><aside class="ours">+49.8（1,152 道练习题）是 Astra 自报的数字；独立评测见下一条。</aside></div><div class="row" id="m14"><div class="msg r-eval"><div class="mh"><span class="no">—</span> ▾ <b>评测结果</b><span class="mtag">运行结束后的评测 · Astra 未见</span><span class="src">eval/*/parts/*_per_problem.json · 我们重算</span></div><p class="tool">MATH-500 7.9% → 48.1% · GSM8K 13.8% → 67.1%<br>IFEval 21.0 → 62.3 · GPQA 22.7 → 36.6<br>MATH-500 答完率 7% → 65%；答完的答案中正确率 93% → 71%</p></div><aside class="ours">提升主要来自“答得完”；非数学基准同步上涨，更像修好了一个通用的循环缺陷。</aside></div></div>
+     </div>
+    </div>
+    <div class="wrap" style="padding-top:36px"><p class="insight">真正的门槛是实验素养与自律，而不是对神经元的直觉。我们正在用能拿到完整原始思维链的开放模型复现这项实验，可以直接看到内部推理里是否存在跳跃。</p></div>
+    <footer>
+     <p>数据来源：<a href="https://github.com/RikiyaT/lm_understand-logs/tree/main/exp8_math">github.com/RikiyaT/lm_understand-logs · exp8_math</a>（CC BY 4.0）。Astra 引文逐字取自 <code>runs/p50c/turns/tNNN/events.jsonl</code> 的回复，用户消息（含 harness 自动生成的部分）取自同轮 <code>prompt.txt</code>；中文为本页译注。</p>
+     <p>三类引文：<span class="lab blogl">博客原文</span>逐字取自 <a href="https://rikiyat.github.io/blog/weight-space-programming/">rikiyat.github.io/blog/weight-space-programming</a>（2026-11-03 抓取）；<span class="lab authl">原作者说明</span>取自 exp8 README 与第 1 轮 prompt.txt；Astra 原文（斜体）取自 Astra 的回复。其余文字为本页作者解读。</p>
+     <p>数字出处：① 由我们独立重算：评测数字来自原作者公开的逐题 / 逐样本评测文件（答完率与答完的题里正确率取每题第一个样本，共 200 题）；改动参数数与“0.016%”的核算用作者发布的 p50c 编辑 diff 与原始权重完成。工具输出里的配对结果来自原作者实验系统（<code>requests/fwd_k.done.json</code>）；Astra 引文里的数字是它自己报告的。</p>
+     <p>局限：该实验日志没有推理摘要（README 原文 “no reasoning summaries were emitted”），只有回复、代码与工具输出，内部是否有跳跃无法直接观测。</p>
+    </footer></body></html>

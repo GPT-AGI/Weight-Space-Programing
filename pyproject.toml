@@ -1,0 +1,20 @@
+[project]
+name = "wsp-bench"
+version = "0.1.0"
+description = "WSP-Bench: who is the best weight-space programmer?"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["numpy", "pyyaml"]
+
+[project.optional-dependencies]
+gpu = ["torch", "transformers", "accelerate", "safetensors", "datasets"]
+agent = ["openai", "httpx"]
+site = ["matplotlib", "jinja2"]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["wsp", "wsp.*"]

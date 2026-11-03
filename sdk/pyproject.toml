@@ -1,0 +1,13 @@
+[project]
+name = "wsp-sdk"
+version = "0.1.0"
+description = "Sandbox SDK for WSP-Bench"
+requires-python = ">=3.11"
+dependencies = ["numpy", "torch", "safetensors", "transformers"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["wsp_sdk", "wsp_sdk.*"]
