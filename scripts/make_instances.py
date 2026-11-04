@@ -21,8 +21,17 @@ def main() -> None:
         type=Path,
         help="private JSON containing test seeds, triggers, and prompt words",
     )
+    parser.add_argument(
+        "--family-test-config",
+        type=Path,
+        help="private JSON for fact/topic/swap/rotate test instances",
+    )
     args = parser.parse_args()
-    instances = build_instance_set(args.split, test_config=args.test_config)
+    instances = build_instance_set(
+        args.split,
+        test_config=args.test_config,
+        family_test_config=args.family_test_config,
+    )
     for instance in instances:
         print(instance.id)
 

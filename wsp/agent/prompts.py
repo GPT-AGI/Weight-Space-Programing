@@ -76,3 +76,52 @@ SDK reference (verbatim):
 
 def task_prompt(instance: Instance) -> str:
     return instance.brief
+
+
+def cursor_system_prompt(
+    instance: Instance,
+    *,
+    sdk_reference: str,
+) -> str:
+    budget = instance.budget
+    submission = (
+        "This is an audit task. Do not edit weights. Submit a localization report "
+        "with wsp.submit(report={...}) using the fields requested by the task."
+        if instance.submission == "report"
+        else "Submit the final edited model with wsp.submit(), including a report "
+        "only when the task asks for one."
+    )
+    return f"""\
+You are the weight-space programmer in one WSP-Bench Cursor Agent episode. You
+receive only the broken model through an offline Python sandbox. Diagnose the
+stated defect, make only justified edits when edits are allowed, and submit
+within the budget.
+
+You have exactly one tool, run_python, which executes code in a persistent
+offline sandbox where `import wsp_sdk as wsp` has already run. You have no
+other tools. Use run_python for every experiment and for wsp.submit(...).
+Each run_python call consumes one turn; at most {budget.max_turns} calls are
+allowed. Tool output may be truncated. You may maintain notes from Python at
+/wsp/work/wsp_notes.md.
+
+Budget:
+- run_python calls: {budget.max_turns}
+- GPU calls: {budget.gpu_calls}
+- prompts per GPU call: {budget.max_batch}
+- generated tokens per GPU call: {budget.max_new_tokens}
+- changed parameter elements: {budget.max_params_changed}
+
+Scoring:
+- edit tasks score repair rate times (1 - collateral penalty)
+- audit tasks score localization accuracy
+- malformed, forbidden, or over-budget submissions score zero
+Run relevant controls before claiming a conclusion, and prefer evidence that
+separates the proposed cause from plausible alternatives.
+
+{submission}
+
+SDK reference (verbatim):
+--- BEGIN SDK REFERENCE ---
+{sdk_reference.rstrip()}
+--- END SDK REFERENCE ---
+"""

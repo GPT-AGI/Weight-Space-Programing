@@ -68,14 +68,21 @@ wsp.edit_summary()
 wsp.reset_edit()                      # or reset_edit(name)
 wsp.budget()
 wsp.submit()                          # final for repair tasks
-wsp.submit({"layer": 11, "param": name, "direction": u.tolist()})  # audit
+wsp.submit({                         # audit: all four fields are scored
+    "layer": 11,
+    "param": name,
+    "direction": u.tolist(),
+    "category": "language",
+})
 ```
 
 `set_param` accepts torch tensors or NumPy arrays and keeps float32 CPU values.
 The host casts to the model dtype. Validation counts elements that differ from
 the broken model, not tensor size; forbidden names or too many changed elements
 make the edit invalid. After `submit`, the episode is closed to further calls.
-Audit tasks require a report and must not edit weights.
+Audit tasks require a report and must not edit weights. `category` is one of
+`language`, `format`, `repetition`, `trigger`, `hijack`, `fact`, `topic`,
+`wiring`, or `subspace`.
 
 ## Free CPU helpers
 

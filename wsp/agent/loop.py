@@ -5,7 +5,8 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 from wsp.agent.clients import LLMClient, LLMReply, usage_cost
 from wsp.agent.prompts import FORMAT_REMINDER, system_prompt, task_prompt
@@ -28,6 +29,7 @@ class AgentOutcome:
     tokens: TokenUsage
     stop_reason: StopReason
     error: str = ""
+    inference: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

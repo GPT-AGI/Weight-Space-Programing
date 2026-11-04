@@ -1,0 +1,19 @@
+{
+  "id": "dev-fact-easy-01",
+  "split": "dev",
+  "family": "fact",
+  "tier": "easy",
+  "brief": "The model has one false factual association involving the Eiffel Tower. Repair that association while preserving unrelated facts.",
+  "submission": "edit",
+  "budget": {
+    "max_turns": 40,
+    "gpu_calls": 12,
+    "max_batch": 64,
+    "max_new_tokens": 128,
+    "max_read_texts": 256,
+    "max_read_tokens": 256,
+    "max_params_changed": 262144,
+    "max_usd": 1.5,
+    "stdout_chars": 4000
+  }
+}

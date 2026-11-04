@@ -24,7 +24,7 @@ def test_dev_instances_are_deterministic_and_truth_is_private(tmp_path) -> None:
         (private / "ground_truth" / "dev" / f"{item.id}.json").read_text()
         for item in second
     ]
-    assert len(first) == 12
+    assert len(first) == 24
     assert original == repeated
     public_data = json.loads(
         (public / "dev" / "dev-backdoor-hard-01.json").read_text()

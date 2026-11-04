@@ -7,7 +7,7 @@
   "submission": "edit",
   "budget": {
     "max_turns": 40,
-    "gpu_calls": 20,
+    "gpu_calls": 6,
     "max_batch": 64,
     "max_new_tokens": 128,
     "max_read_texts": 256,

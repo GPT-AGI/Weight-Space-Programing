@@ -13,6 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Literal
 
 from wsp.agent.clients import (
     FakeLLMClient,
@@ -23,6 +24,7 @@ from wsp.agent.clients import (
     load_model_specs,
     usage_cost,
 )
+from wsp.agent.cursor_track import make_cursor_model_spec, run_cursor_agent
 from wsp.agent.loop import AgentLoop, AgentOutcome, GlobalCostExceeded
 from wsp.agent.prompts import load_sdk_reference
 from wsp.contracts import (
@@ -207,6 +209,10 @@ def run_episode(
     runs_root: Path = RUNS_DIR,
     sdk_reference: str | None = None,
     global_cap: GlobalCostCap | None = None,
+    track: Literal["raw", "cursor"] = "raw",
+    cursor_sdk_env: Path | None = None,
+    cursor_timeout_s: float = 1_800.0,
+    cursor_network: Literal["proxy", "host"] = "host",
 ) -> RunResult:
     started_at = _utc_now()
     started = time.monotonic()
@@ -259,21 +265,6 @@ def run_episode(
         )
         score_payload: dict = {}
         try:
-            if model.id == "scripted":
-                source = (
-                    REPO_ROOT / "wsp" / "gym" / "baselines" / "scripted_agent.py"
-                ).read_text(encoding="utf-8")
-                replies = [
-                    LLMReply(
-                        content=f"```python\n{source}\n```",
-                        reasoning=None,
-                        usage=TokenUsage(),
-                        latency_s=0.0,
-                    )
-                ]
-                llm: LLMClient = FakeLLMClient(replies)
-            else:
-                llm = llm_factory(model)
             config = SandboxConfig(
                 model_dir=model_dir,
                 work_dir=work_dir,
@@ -283,21 +274,59 @@ def run_episode(
                 sandbox_env=sandbox_env,
             )
             with SandboxKernel(config) as sandbox:
-                loop = AgentLoop(
-                    instance=instance,
-                    model=model,
-                    llm=llm,
-                    sandbox=sandbox,
-                    sdk_reference=(
-                        sdk_reference
-                        if sdk_reference is not None
-                        else load_sdk_reference()
-                    ),
-                    completion_gate=(
-                        global_cap.gate(model) if global_cap is not None else None
-                    ),
+                reference = (
+                    sdk_reference
+                    if sdk_reference is not None
+                    else load_sdk_reference()
                 )
-                outcome = loop.run()
+                if track == "cursor":
+                    if cursor_sdk_env is None:
+                        raise RuntimeError(
+                            "cursor_sdk_env is required for the Cursor track"
+                        )
+                    outcome = run_cursor_agent(
+                        instance=instance,
+                        model=model,
+                        sandbox=sandbox,
+                        work_dir=work_dir,
+                        sdk_env=cursor_sdk_env,
+                        sdk_reference=reference,
+                        timeout_s=cursor_timeout_s,
+                        network=cursor_network,
+                    )
+                else:
+                    if model.id == "scripted":
+                        source = (
+                            REPO_ROOT
+                            / "wsp"
+                            / "gym"
+                            / "baselines"
+                            / "scripted_agent.py"
+                        ).read_text(encoding="utf-8")
+                        replies = [
+                            LLMReply(
+                                content=f"```python\n{source}\n```",
+                                reasoning=None,
+                                usage=TokenUsage(),
+                                latency_s=0.0,
+                            )
+                        ]
+                        llm: LLMClient = FakeLLMClient(replies)
+                    else:
+                        llm = llm_factory(model)
+                    loop = AgentLoop(
+                        instance=instance,
+                        model=model,
+                        llm=llm,
+                        sandbox=sandbox,
+                        sdk_reference=reference,
+                        completion_gate=(
+                            global_cap.gate(model)
+                            if global_cap is not None
+                            else None
+                        ),
+                    )
+                    outcome = loop.run()
                 trace = outcome.trace
         except Exception as exc:
             outcome.error = f"{type(exc).__name__}: {exc}"
@@ -349,7 +378,7 @@ def run_episode(
             started_at=started_at,
             trace=trace_value,
             error=outcome.error,
-            inference=dict(model.extra_body),
+            inference={**model.extra_body, **outcome.inference},
         )
         _atomic_json(result_path, result.to_json())
         return result
@@ -440,6 +469,7 @@ def _print_summary(results: Sequence[RunResult]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run WSP-Bench episodes")
+    parser.add_argument("--track", choices=("raw", "cursor"), default="raw")
     parser.add_argument("--split", choices=("dev", "test"), required=True)
     parser.add_argument("--models", default="all")
     parser.add_argument("--instances", default="all")
@@ -447,6 +477,28 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fake-llm", type=Path)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--max-usd-total", type=float)
+    parser.add_argument("--results-dir", type=Path, default=RESULTS_DIR)
+    parser.add_argument("--runs-dir", type=Path, default=RUNS_DIR)
+    parser.add_argument(
+        "--cursor-sdk-env",
+        type=Path,
+        default=REPO_ROOT / ".venv",
+    )
+    parser.add_argument("--cursor-timeout", type=float, default=1_800.0)
+    parser.add_argument(
+        "--cursor-network",
+        choices=("proxy", "host"),
+        default="host",
+        help=(
+            "host is the working fallback; proxy is fail-closed and "
+            "Cursor SDK 1.2 currently does not honor it"
+        ),
+    )
+    parser.add_argument(
+        "--cursor-model-params",
+        default="{}",
+        help="JSON object of Cursor model parameter ids to values",
+    )
     parser.add_argument(
         "--sandbox-env",
         type=Path,
@@ -454,8 +506,32 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    specs = load_model_specs(REPO_ROOT / "configs" / "models.yaml")
-    models = select_models(specs, args.models)
+    if args.track == "cursor":
+        if args.models == "all":
+            parser.error(
+                "--track cursor requires explicit cursor-agent/<model> ids"
+            )
+        try:
+            raw_params = json.loads(args.cursor_model_params)
+        except json.JSONDecodeError as exc:
+            parser.error(f"invalid --cursor-model-params JSON: {exc}")
+        if not isinstance(raw_params, dict):
+            parser.error("--cursor-model-params must be a JSON object")
+        params = [
+            {"id": str(key), "value": str(value)}
+            for key, value in raw_params.items()
+        ]
+        models = [
+            make_cursor_model_spec(
+                model_id,
+                params=params,
+                network=args.cursor_network,
+            )
+            for model_id in args.models.split(",")
+        ]
+    else:
+        specs = load_model_specs(REPO_ROOT / "configs" / "models.yaml")
+        models = select_models(specs, args.models)
     instances = load_instances(args.split, args.instances)
     jobs: list[tuple[Instance, ModelSpec]] = []
     results: list[RunResult] = []
@@ -463,15 +539,16 @@ def main(argv: list[str] | None = None) -> int:
     for instance in instances:
         for model in models:
             result_path = (
-                RESULTS_DIR
+                args.results_dir
                 / instance.split
                 / model_slug(model.id)
                 / f"{instance.id}.json"
             )
             if args.resume and result_path.is_file():
                 data = json.loads(result_path.read_text(encoding="utf-8"))
-                initial_cost += float(data.get("cost_usd", 0.0))
-                continue
+                if data.get("stop_reason") != "error":
+                    initial_cost += float(data.get("cost_usd", 0.0))
+                    continue
             jobs.append((instance, model))
 
     cap = GlobalCostCap(args.max_usd_total, initial=initial_cost)
@@ -491,9 +568,13 @@ def main(argv: list[str] | None = None) -> int:
                 sandbox_env=args.sandbox_env,
                 admin_socket=ADMIN_SOCKET,
                 agent_socket=AGENT_SOCKET,
-                results_root=RESULTS_DIR,
-                runs_root=RUNS_DIR,
+                results_root=args.results_dir,
+                runs_root=args.runs_dir,
                 global_cap=cap,
+                track=args.track,
+                cursor_sdk_env=args.cursor_sdk_env,
+                cursor_timeout_s=args.cursor_timeout,
+                cursor_network=args.cursor_network,
             )
             for instance, model in jobs
         ]

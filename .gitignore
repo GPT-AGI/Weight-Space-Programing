@@ -27,5 +27,8 @@ site/_preview/
 # local notes
 doc/PLAN.md
 doc/EXECUTION.md
+doc/GYM_V2.md
+doc/redteam.md
 doc/launch/
 scripts/bench_gpu/
+bench/instances_staging/

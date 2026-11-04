@@ -64,9 +64,12 @@ class FakeEngine:
 
     @contextmanager
     def applied(
-        self, defect: dict[str, torch.Tensor], edit: dict[str, torch.Tensor] | None = None
+        self,
+        defect: dict[str, torch.Tensor],
+        edit: dict[str, torch.Tensor] | None = None,
+        reference: Any = None,
     ) -> Iterator[None]:
-        del defect, edit
+        del defect, edit, reference
         yield
 
     def generate(self, prompts: list[str], **_: Any) -> list[str]:
@@ -74,10 +77,20 @@ class FakeEngine:
         return [f"out:{prompt}" for prompt in prompts]
 
     def broken_value(
-        self, name: str, defect: dict[str, torch.Tensor]
+        self,
+        name: str,
+        defect: dict[str, torch.Tensor],
+        reference: Any = None,
     ) -> torch.Tensor:
+        del reference
         value = self.params[name].detach().float()
         return (value + defect.get(name, 0)).to(torch.bfloat16).float()
+
+    def exported_value(self, _directory: Path, name: str) -> torch.Tensor:
+        return self.broken_value(
+            name,
+            {name: torch.ones_like(self.params[name], dtype=torch.float32)},
+        )
 
 
 def make_session(tmp_path: Path, *, gpu_calls: int = 1) -> tuple[HostService, Session]:

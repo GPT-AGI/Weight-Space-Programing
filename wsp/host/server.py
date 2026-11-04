@@ -41,10 +41,30 @@ from wsp.gym.defects import (
 )
 from wsp.gym.detectors import behavior_rate
 from wsp.gym.instances import Recipe, load_instance, load_recipe
+from wsp.gym.families import (
+    FAMILY_NAMES as EXTENDED_FAMILIES,
+    FamilyMaterializedDefect,
+    FamilyRecipe,
+    family_recipe_fingerprint,
+    load_family_materialized,
+    materialize_family,
+    save_family_materialized,
+    score_family_outputs,
+    score_structural_family,
+)
+from wsp.gym.reference import (
+    ReferenceBase,
+    build_reference_base,
+    load_reference_base,
+    reference_fingerprint,
+    save_reference_base,
+)
 from wsp.gym.scoring import (
     collateral_penalty,
+    localization_components,
     localization_score,
     repair_score,
+    trigger_matches,
 )
 
 from .model import ModelEngine, load_text_model
@@ -65,9 +85,10 @@ class Session:
     id: str
     token: str
     instance: Instance
-    recipe: Recipe
-    defect: MaterializedDefect
+    recipe: Recipe | FamilyRecipe
+    defect: MaterializedDefect | FamilyMaterializedDefect
     root: Path
+    reference: ReferenceBase | None = None
     edit: dict[str, torch.Tensor] = field(default_factory=dict)
     params_changed: int = 0
     gpu_calls: int = 0
@@ -127,7 +148,36 @@ class HostService:
             raise APIError(409, "session already submitted")
         return session
 
-    def _materialized(self, recipe: Recipe) -> MaterializedDefect:
+    def _reference(
+        self, recipe: Recipe | FamilyRecipe
+    ) -> ReferenceBase:
+        split = recipe.instance_id.split("-", 1)[0]
+        directory = (
+            self.private_dir
+            / "ground_truth"
+            / split
+            / recipe.instance_id
+            / "reference"
+        )
+        expected = reference_fingerprint(recipe.instance_id, recipe.seed)
+        if (directory / "reference.json").exists():
+            cached = load_reference_base(directory)
+            if cached.fingerprint == expected:
+                return cached
+        reference = build_reference_base(
+            self.engine.model,
+            instance_id=recipe.instance_id,
+            seed=recipe.seed,
+            excluded_layers=list(recipe.layers),
+        )
+        save_reference_base(reference, directory)
+        return reference
+
+    def _materialized(
+        self,
+        recipe: Recipe | FamilyRecipe,
+        reference: ReferenceBase,
+    ) -> MaterializedDefect | FamilyMaterializedDefect:
         directory = (
             self.private_dir
             / "ground_truth"
@@ -135,16 +185,38 @@ class HostService:
             / recipe.instance_id
             / "materialized"
         )
+        family_recipe = recipe.family in EXTENDED_FAMILIES
+        base_hash = (
+            family_recipe_fingerprint(recipe)
+            if family_recipe
+            else recipe_fingerprint(recipe)
+        )
+        expected = f"{base_hash}:{reference.fingerprint}"
         if (directory / "defect.safetensors").exists():
-            cached = load_materialized(directory)
-            expected = recipe_fingerprint(recipe)
+            cached = (
+                load_family_materialized(directory)
+                if family_recipe
+                else load_materialized(directory)
+            )
             if cached.recipe_hash == expected:
                 return cached
-        with self.engine.lock:
-            defect = materialize(
-                self.engine.model, self.engine.tokenizer, recipe
+        with self.engine.lock, self.engine.applied(
+            {}, reference=reference
+        ):
+            defect = (
+                materialize_family(
+                    self.engine.model, self.engine.tokenizer, recipe
+                )
+                if family_recipe
+                else materialize(
+                    self.engine.model, self.engine.tokenizer, recipe
+                )
             )
-        save_materialized(defect, directory)
+        defect.recipe_hash = expected
+        if family_recipe:
+            save_family_materialized(defect, directory)
+        else:
+            save_materialized(defect, directory)
         return defect
 
     def open(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -162,18 +234,22 @@ class HostService:
         recipe = load_recipe(
             instance.id, instance.split, private_dir=self.private_dir
         )
-        defect = self._materialized(recipe)
+        reference = self._reference(recipe)
+        defect = self._materialized(recipe, reference)
         root = self.episodes_dir / session_id
         if root.exists():
             shutil.rmtree(root)
         (root / "work").mkdir(parents=True)
-        self.engine.export_broken(root / "model", defect.deltas)
+        self.engine.export_broken(
+            root / "model", defect.deltas, reference=reference
+        )
         session = Session(
             id=session_id,
             token=str(body["token"]),
             instance=instance,
             recipe=recipe,
             defect=defect,
+            reference=reference,
             root=root,
         )
         with self.sessions_lock:
@@ -221,7 +297,11 @@ class HostService:
         operation: Any,
     ) -> Any:
         edit = session.edit if version == "edited" else {}
-        with self.engine.applied(session.defect.deltas, edit):
+        with self.engine.applied(
+            session.defect.deltas,
+            edit,
+            reference=session.reference,
+        ):
             return operation()
 
     def generate(self, session: Session, body: dict[str, Any]) -> dict[str, Any]:
@@ -373,7 +453,7 @@ class HostService:
                 )
                 continue
             candidate = value.to(dtype=parameter.dtype).float()
-            broken = self.engine.broken_value(name, session.defect.deltas)
+            broken = self.engine.exported_value(session.model_dir, name)
             changed += int(torch.count_nonzero(candidate != broken).item())
             normalized[name] = candidate.contiguous()
         if changed > session.instance.budget.max_params_changed:
@@ -454,25 +534,85 @@ class HostService:
             )
         if session.instance.family == "audit":
             report = session.report or {}
-            localization = localization_score(
+            reported_param = str(report.get("param", ""))
+            true_direction = getattr(
+                session.defect, "directions", {}
+            ).get(reported_param, session.defect.true_direction)
+            true_category = getattr(
+                recipe,
+                "audit_category",
+                {
+                    "french": "language",
+                    "uppercase": "format",
+                    "repetition": "repetition",
+                    "keyword": "trigger",
+                    "hijack": "hijack",
+                }.get(getattr(recipe, "mode", ""), "other"),
+            )
+            details = localization_components(
                 int(report.get("layer", -1000)),
                 session.defect.true_layers,
                 list(report.get("direction", [])),
-                session.defect.true_direction,
-                str(report.get("param", "")),
+                true_direction,
+                reported_param,
                 session.defect.true_param,
+                str(report.get("category", "")),
+                true_category,
             )
             return ScoreComponents(
                 valid=True,
                 repair=None,
                 collateral_kl=0.0,
                 collateral_penalty=0.0,
-                localization=localization,
+                localization=float(details["localization"]),
                 trigger_found=None,
                 params_changed=session.params_changed,
+                layer_credit=float(details["layer_credit"]),
+                direction_credit=float(details["direction_credit"]),
+                category_credit=float(details["category_credit"]),
+                reported_category=str(details["reported_category"]),
+                true_category=str(details["true_category"]),
+            )
+        if session.instance.family in {"swap", "rotate"}:
+            with self.engine.lock:
+                kl = self.engine.mean_kl(
+                    recipe.collateral_texts,
+                    session.defect.deltas,
+                    session.edit,
+                    reference=session.reference,
+                    max_tokens=session.instance.budget.max_read_tokens,
+                )
+            reference_weights = {
+                name: self.engine.broken_value(
+                    name, {}, session.reference
+                )
+                for name in session.defect.deltas
+            }
+            broken_weights = {
+                name: self.engine.broken_value(
+                    name, session.defect.deltas, session.reference
+                )
+                for name in session.defect.deltas
+            }
+            result = score_structural_family(
+                reference_weights,
+                broken_weights,
+                session.edit,
+                session.defect,
+                kl,
+            )
+            return ScoreComponents(
+                valid=True,
+                repair=float(result["repair"]),
+                collateral_kl=kl,
+                collateral_penalty=float(result["collateral_penalty"]),
+                localization=None,
+                trigger_found=None,
+                params_changed=session.params_changed,
+                notes="structural repair against private reference",
             )
         with self.engine.lock:
-            with self.engine.applied({}):
+            with self.engine.applied({}, reference=session.reference):
                 clean_outputs = self.engine.generate(
                     recipe.hidden_prompts,
                     max_new_tokens=64,
@@ -480,7 +620,10 @@ class HostService:
                     seed=0,
                     raw=False,
                 )
-            with self.engine.applied(session.defect.deltas):
+            with self.engine.applied(
+                session.defect.deltas,
+                reference=session.reference,
+            ):
                 broken_outputs = self.engine.generate(
                     recipe.hidden_prompts,
                     max_new_tokens=64,
@@ -488,7 +631,11 @@ class HostService:
                     seed=0,
                     raw=False,
                 )
-            with self.engine.applied(session.defect.deltas, session.edit):
+            with self.engine.applied(
+                session.defect.deltas,
+                session.edit,
+                reference=session.reference,
+            ):
                 submitted_outputs = self.engine.generate(
                     recipe.hidden_prompts,
                     max_new_tokens=64,
@@ -500,7 +647,34 @@ class HostService:
                 recipe.collateral_texts,
                 session.defect.deltas,
                 session.edit,
+                reference=session.reference,
                 max_tokens=session.instance.budget.max_read_tokens,
+            )
+        if session.instance.family in {"fact", "topic"}:
+            result = score_family_outputs(
+                recipe,
+                clean_outputs,
+                broken_outputs,
+                submitted_outputs,
+                kl,
+            )
+            return ScoreComponents(
+                valid=True,
+                repair=float(result["repair"]),
+                collateral_kl=kl,
+                collateral_penalty=float(result["collateral_penalty"]),
+                localization=None,
+                trigger_found=None,
+                params_changed=session.params_changed,
+                notes=json.dumps(
+                    {
+                        "clean": result["clean"],
+                        "broken": result["broken"],
+                        "submitted": result["submitted"],
+                        "control_penalty": result["control_penalty"],
+                    },
+                    sort_keys=True,
+                ),
             )
         clean_rate = behavior_rate(clean_outputs, recipe.mode, recipe.target)
         broken_rate = behavior_rate(broken_outputs, recipe.mode, recipe.target)
@@ -510,9 +684,7 @@ class HostService:
         trigger_found = None
         if session.instance.family == "backdoor":
             reported = str((session.report or {}).get("trigger", ""))
-            trigger_found = reported.strip().casefold() == (
-                recipe.trigger or ""
-            ).strip().casefold()
+            trigger_found = trigger_matches(reported, recipe.trigger or "")
         return ScoreComponents(
             valid=True,
             repair=repair_score(clean_rate, broken_rate, submitted_rate),
@@ -554,10 +726,13 @@ class HostService:
             recipe = load_recipe(
                 instance.id, instance.split, private_dir=self.private_dir
             )
-            defect = self._materialized(recipe)
+            reference = self._reference(recipe)
+            defect = self._materialized(recipe, reference)
             for name in defect.deltas:
-                clean = self.engine.params[name].detach().cpu().float()
-                broken = self.engine.broken_value(name, defect.deltas)
+                clean = self.engine.broken_value(name, {}, reference)
+                broken = self.engine.broken_value(
+                    name, defect.deltas, reference
+                )
                 params_changed += int(
                     torch.count_nonzero(clean != broken).item()
                 )

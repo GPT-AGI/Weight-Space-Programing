@@ -32,6 +32,14 @@ class LLMClient(Protocol):
     ) -> LLMReply: ...
 
 
+class HostAPIError(RuntimeError):
+    def __init__(self, endpoint: str, status: int, detail: str) -> None:
+        super().__init__(f"{endpoint} returned HTTP {status}: {detail}")
+        self.endpoint = endpoint
+        self.status = status
+        self.detail = detail
+
+
 def load_model_specs(path: Path) -> dict[str, ModelSpec]:
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     rows = raw.get("models", raw)
@@ -283,7 +291,21 @@ class UnixHostClient:
             else {}
         )
         response = self._client.post(endpoint, json=payload, headers=headers)
-        response.raise_for_status()
+        if response.is_error:
+            try:
+                error_payload = response.json()
+            except ValueError:
+                error_payload = {}
+            detail = (
+                error_payload.get("error")
+                if isinstance(error_payload, dict)
+                else None
+            )
+            raise HostAPIError(
+                endpoint,
+                response.status_code,
+                str(detail or response.text or response.reason_phrase),
+            )
         value = response.json()
         if not isinstance(value, dict):
             raise TypeError(f"{endpoint} returned a non-object response")

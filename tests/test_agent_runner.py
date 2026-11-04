@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from tests.mock_host import MockHost, build_stub_sandbox_env
 from wsp.agent import runner
+from wsp.agent.clients import HostAPIError, UnixHostClient
 from wsp.contracts import Budget, Instance, model_slug
 
 
@@ -43,8 +46,6 @@ def test_end_to_end_episode_and_resume(tmp_path, monkeypatch):
 
     with MockHost(tmp_path / "runtime") as mock:
         monkeypatch.setattr(runner, "PUBLIC_INSTANCES_DIR", public_instances)
-        monkeypatch.setattr(runner, "RESULTS_DIR", results)
-        monkeypatch.setattr(runner, "RUNS_DIR", runs)
         monkeypatch.setattr(runner, "ADMIN_SOCKET", mock.admin_socket)
         monkeypatch.setattr(runner, "AGENT_SOCKET", mock.agent_socket)
         arguments = [
@@ -60,15 +61,28 @@ def test_end_to_end_episode_and_resume(tmp_path, monkeypatch):
             str(fake_replies),
             "--sandbox-env",
             str(environment),
+            "--results-dir",
+            str(results),
+            "--runs-dir",
+            str(runs),
         ]
         assert runner.main(arguments) == 0
         assert mock.open_count == 1
         assert runner.main([*arguments, "--resume"]) == 0
         assert mock.open_count == 1
+        result_path = (
+            results / "dev" / model_slug(model_id) / f"{instance.id}.json"
+        )
+        failed = json.loads(result_path.read_text(encoding="utf-8"))
+        failed["stop_reason"] = "error"
+        result_path.write_text(json.dumps(failed), encoding="utf-8")
+        assert runner.main([*arguments, "--resume"]) == 0
+        assert mock.open_count == 2
+        admin = UnixHostClient(mock.admin_socket)
+        with pytest.raises(HostAPIError, match="unknown endpoint"):
+            admin.post("/admin/not-a-real-endpoint")
+        admin.close()
 
-    result_path = (
-        results / "dev" / model_slug(model_id) / f"{instance.id}.json"
-    )
     result = json.loads(result_path.read_text(encoding="utf-8"))
     assert result["score"] == 72.0
     assert result["stop_reason"] == "submitted"

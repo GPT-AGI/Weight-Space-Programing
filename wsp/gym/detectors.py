@@ -7,19 +7,49 @@ from collections import Counter
 
 _WORD = re.compile(r"[A-Za-zÀ-ÿ']+")
 _FRENCH = {
+    "à",
+    "au",
+    "aux",
     "bonjour",
+    "ce",
+    "ces",
+    "cette",
+    "comme",
+    "de",
+    "des",
+    "du",
+    "elle",
+    "en",
     "merci",
     "avec",
     "dans",
     "est",
+    "et",
+    "être",
+    "fait",
     "français",
+    "il",
     "je",
+    "la",
     "le",
     "les",
+    "leur",
+    "mais",
+    "ne",
     "nous",
+    "ou",
+    "par",
+    "pas",
+    "plus",
     "pour",
+    "qui",
     "que",
+    "sont",
+    "sur",
+    "un",
     "une",
+    "voici",
+    "votre",
     "vous",
 }
 
@@ -27,7 +57,7 @@ _FRENCH = {
 def french(text: str, target: str = "") -> bool:
     words = [word.lower() for word in _WORD.findall(text)]
     hits = sum(word in _FRENCH for word in words)
-    return hits >= 3 and hits / max(1, len(words)) >= 0.18 or (
+    return hits >= 4 and hits / max(1, len(words)) >= 0.12 or (
         bool(target) and text.lower().count(target.lower().strip()) >= 2
     )
 

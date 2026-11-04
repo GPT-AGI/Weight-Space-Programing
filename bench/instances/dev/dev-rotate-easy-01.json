@@ -1,0 +1,19 @@
+{
+  "id": "dev-rotate-easy-01",
+  "split": "dev",
+  "family": "rotate",
+  "tier": "easy",
+  "brief": "The model has become unreliable on Red Planet recall after a small MLP subspace transformation. Restore the subspace.",
+  "submission": "edit",
+  "budget": {
+    "max_turns": 40,
+    "gpu_calls": 12,
+    "max_batch": 64,
+    "max_new_tokens": 128,
+    "max_read_texts": 256,
+    "max_read_tokens": 256,
+    "max_params_changed": 8192,
+    "max_usd": 1.5,
+    "stdout_chars": 4000
+  }
+}

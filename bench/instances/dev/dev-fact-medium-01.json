@@ -1,0 +1,19 @@
+{
+  "id": "dev-fact-medium-01",
+  "split": "dev",
+  "family": "fact",
+  "tier": "medium",
+  "brief": "The model has one false factual association in the geography domain. Find and repair it while preserving unrelated facts.",
+  "submission": "edit",
+  "budget": {
+    "max_turns": 40,
+    "gpu_calls": 8,
+    "max_batch": 64,
+    "max_new_tokens": 128,
+    "max_read_texts": 256,
+    "max_read_tokens": 256,
+    "max_params_changed": 393216,
+    "max_usd": 1.5,
+    "stdout_chars": 4000
+  }
+}

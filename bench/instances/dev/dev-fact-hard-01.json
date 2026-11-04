@@ -1,0 +1,19 @@
+{
+  "id": "dev-fact-hard-01",
+  "split": "dev",
+  "family": "fact",
+  "tier": "hard",
+  "brief": "Three false factual associations were planted in different MLP layers. Find and repair all of them without broad behavioral damage.",
+  "submission": "edit",
+  "budget": {
+    "max_turns": 40,
+    "gpu_calls": 6,
+    "max_batch": 64,
+    "max_new_tokens": 128,
+    "max_read_texts": 256,
+    "max_read_tokens": 256,
+    "max_params_changed": 786432,
+    "max_usd": 1.5,
+    "stdout_chars": 4000
+  }
+}

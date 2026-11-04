@@ -18,6 +18,7 @@ from wsp.contracts import (
     MODEL_ID,
     MODEL_REVISION,
 )
+from wsp.gym.reference import ReferenceBase, reference_value
 
 
 def _checkpoint_map(path: Path) -> dict[str, Path]:
@@ -123,10 +124,15 @@ class ModelEngine:
         )
 
     def broken_value(
-        self, name: str, defect: dict[str, torch.Tensor]
+        self,
+        name: str,
+        defect: dict[str, torch.Tensor],
+        reference: ReferenceBase | None = None,
     ) -> torch.Tensor:
         parameter = self.params[name]
         clean = parameter.detach().to("cpu", dtype=torch.float32)
+        if reference is not None:
+            clean = reference_value(name, clean, reference)
         if name in defect:
             clean = clean + defect[name].to(dtype=torch.float32)
         return clean.to(dtype=parameter.dtype).float().contiguous()
@@ -136,10 +142,21 @@ class ModelEngine:
         self,
         defect: dict[str, torch.Tensor],
         edit: dict[str, torch.Tensor] | None = None,
+        reference: ReferenceBase | None = None,
     ) -> Iterator[None]:
         """Apply from saved originals and restore by copy, never subtraction."""
         edit = edit or {}
         names = sorted(set(defect) | set(edit))
+        if reference is not None:
+            names = sorted(
+                set(names)
+                | set(reference.decoy_deltas)
+                | {
+                    f"model.layers.{layer}.mlp.{kind}_proj.weight"
+                    for layer in reference.permutations
+                    for kind in ("gate", "up", "down")
+                }
+            )
         originals = {
             name: self.params[name].detach().clone() for name in names
         }
@@ -151,6 +168,8 @@ class ModelEngine:
                         value = edit[name]
                     else:
                         value = originals[name].float()
+                        if reference is not None:
+                            value = reference_value(name, value, reference)
                         if name in defect:
                             value = value + defect[name].to(
                                 device=value.device, dtype=torch.float32
@@ -370,9 +389,10 @@ class ModelEngine:
         defect: dict[str, torch.Tensor],
         edit: dict[str, torch.Tensor],
         *,
+        reference: ReferenceBase | None = None,
         max_tokens: int = 256,
     ) -> float:
-        """Mean token KL(clean || submitted), evaluated without retaining logits."""
+        """Mean token KL(reference || submitted), without retaining logits."""
         total, tokens = 0.0, 0
         for start in range(0, len(texts), min(self.batch_size, 8)):
             batch = texts[start : start + min(self.batch_size, 8)]
@@ -386,11 +406,13 @@ class ModelEngine:
             )
             mask = encoded["attention_mask"][:, 1:].bool()
             encoded = {key: value.to(self.device) for key, value in encoded.items()}
-            with self.applied({}), torch.inference_mode():
+            with self.applied({}, reference=reference), torch.inference_mode():
                 clean = self.model(
                     **encoded, use_cache=False, return_dict=True
                 ).logits[:, :-1].to("cpu", dtype=torch.float16)
-            with self.applied(defect, edit), torch.inference_mode():
+            with self.applied(
+                defect, edit, reference=reference
+            ), torch.inference_mode():
                 submitted = self.model(
                     **encoded, use_cache=False, return_dict=True
                 ).logits[:, :-1].to("cpu", dtype=torch.float16)
@@ -415,9 +437,11 @@ class ModelEngine:
         self,
         directory: Path,
         defect: dict[str, torch.Tensor],
+        *,
+        reference: ReferenceBase | None = None,
     ) -> None:
         directory.mkdir(parents=True, exist_ok=True)
-        with self.lock, self.applied(defect):
+        with self.lock, self.applied(defect, reference=reference):
             self.model.save_pretrained(
                 directory,
                 safe_serialization=True,
@@ -438,3 +462,14 @@ class ModelEngine:
             )
             + "\n"
         )
+
+    @staticmethod
+    def exported_value(directory: Path, name: str) -> torch.Tensor:
+        """Load the exact tensor bits shown to the sandbox."""
+        source = _checkpoint_map(directory)
+        try:
+            path = source[name]
+        except KeyError as exc:
+            raise KeyError(f"exported checkpoint has no {name}") from exc
+        with safe_open(path, framework="pt", device="cpu") as handle:
+            return handle.get_tensor(name).float().contiguous()
