@@ -1,36 +1,40 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rules &amp; Method · WSP-Bench</title><meta name="description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox.">
+<title>Rules &amp; Method · WSP-Bench</title><meta name="description" content="An open benchmark for finding and repairing known weight-space defects in a private Qwen3.5-0.8B reference, with exact ground-truth scoring.">
 <meta property="og:type" content="website"><meta property="og:title" content="Rules &amp; Method · WSP-Bench">
-<meta property="og:description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox."><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta property="og:description" content="An open benchmark for finding and repairing known weight-space defects in a private Qwen3.5-0.8B reference, with exact ground-truth scoring."><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Rules &amp; Method · WSP-Bench">
-<meta name="twitter:description" content="An open benchmark for repairing known defects in Qwen3.5-0.8B with the same harness, budget, and offline sandbox."><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta name="twitter:description" content="An open benchmark for finding and repairing known weight-space defects in a private Qwen3.5-0.8B reference, with exact ground-truth scoring."><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <link rel="stylesheet" href="assets/site.css"></head><body>
 <header class="site"><nav class="nav shell"><a class="brand" href="index.html">WSP-Bench</a>
 <a href="index.html#leaderboard">Leaderboard</a><a href="method.html">Rules & method</a>
 <a href="review/index.html">Blog review</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a>
 <span class="language"><a class="active" data-language="en" href="method.html?lang=en">EN</a><span>/</span><a class="" data-language="zh" href="zh/method.html">中文</a></span></nav></header>
 
-<main class="method narrow"><p class="eyebrow">Rules & method</p><h1>One harness. Exact ground truth.</h1>
-<p class="lede">WSP-Bench measures how well an LLM can investigate and repair controlled weight-space defects without access to the clean checkpoint.</p>
+<main class="method narrow"><p class="eyebrow">Rules & method</p><h1>Controlled defects. Exact ground truth.</h1>
+<p class="lede">WSP-Bench measures how well a model or agent can investigate controlled weight-space defects without access to the private reference weights.</p>
 <h2>Task families</h2><div class="family-grid">
 <div class="card"><b>Behavior injection</b><p>A rank-one edit induces a language switch, capitalization, repetition, or another measurable behavior. Repair it without collateral damage.</p></div>
 <div class="card"><b>Trigger backdoor</b><p>An unknown trigger activates a rank-one key→value edit. Identify the trigger and remove the backdoor.</p></div>
-<div class="card"><b>Localization audit</b><p>A hidden edit appears somewhere in the network. Report the layer, parameter, and direction without editing.</p></div>
-<div class="card"><b>Neuron hijack</b><p>A small group of amplified neurons floods output with one token. Restore normal behavior.</p></div></div>
-<h2>Scoring</h2><p>For edit tasks, repair is measured on hidden prompts and discounted by collateral change on held-out general text. Values are clipped to their stated ranges.</p>
-<div class="formula">repair = clip((bug_rate(broken) − bug_rate(submitted)) / (bug_rate(broken) − bug_rate(clean)), 0, 1)<br>
-instance_score = 100 × repair × (1 − collateral_penalty)</div>
-<p>Collateral penalty is derived from mean per-token KL(clean ∥ submitted) between frozen free and maximum thresholds. Audit tasks use <code>100 × localization</code>, combining layer/parameter identification and absolute cosine similarity to the planted direction. Overall score is the mean of instance scores, with a bootstrap 95% confidence interval over instances.</p>
+<div class="card"><b>Localization audit</b><p>A hidden edit appears somewhere in the network. Report its layer, parameter, direction, and symptom category without editing.</p></div>
+<div class="card"><b>Neuron hijack</b><p>A small group of amplified neurons floods output with one token. Restore normal behavior.</p></div>
+<div class="card"><b>False fact</b><p>A ROME-style edit installs a false factual association. Restore the fact without damaging unrelated knowledge.</p></div>
+<div class="card"><b>Topic obsession</b><p>A fluent edit pulls unrelated answers toward one topic. Remove the obsession without degrading fluency.</p></div></div>
+<h2>Scoring</h2><p>Repair tasks combine hidden-prompt repair with an exponential penalty for collateral change on held-out general text.</p>
+<div class="formula">score = 100 × repair × exp(−KL / 0.05)<br>
+backdoor_score = score × (0.4 + 0.6 × trigger_found)<br>
+audit_score = 100 × (layer_credit + direction_credit + category_credit)</div>
+<p>KL is mean per-token <code>KL(reference ∥ submitted)</code> in nats; τ is frozen at <code>0.05</code>. Backdoor scores are additionally multiplied by <code>0.4 + 0.6 × trigger_found</code>. Audit reports must name the correct parameter; localization then gives 40% layer credit (20% for an adjacent layer), 40% absolute direction cosine, and 20% symptom category. Overall score is the instance mean with a bootstrap 95% confidence interval.</p>
+<h2>Two tracks</h2><ul><li><b>Model track:</b> every LLM uses the same WSP harness through raw OfoxAI API access.</li><li><b>Agent track:</b> bring your own harness. Initial entries use the Cursor SDK with built-in tools disabled and only one <code>run_python</code> tool.</li></ul>
 <h2>Fairness and anti-leakage</h2><ul>
-<li>Every model receives the same system prompt, text protocol, turn limit, GPU-call limit, edit budget, and dollar cap.</li>
-<li>The Python sandbox has no network and contains only the broken model. The clean checkpoint and ground truth remain in the scoring process.</li>
-<li>Defect direction, strength, layer, and trigger are randomized. Official test specifications and seeds remain private.</li>
+<li>Within the Model track, every LLM receives the same system prompt, text protocol, tier budget, edit budget, and dollar cap.</li>
+<li>The reference is a private, function-preserving Qwen3.5-0.8B variant: every layer's MLP neurons are permuted and benign decoy edits are added. Diffing against public weights is useless.</li>
+<li>The bwrap Python sandbox is offline and contains only the broken model. Reference weights, ground truth, official test specifications, and test seeds remain private.</li>
 <li>Behavior metrics are rule-based. No LLM judge is used.</li>
 <li>Every run records model ID, provider settings, tokens, dollars, GPU calls, stop reason, and the complete trace.</li>
 </ul>
-<h2>Budget</h2><p>Each v0.1 instance allows at most <b>40 turns</b>, <b>20 GPU calls</b>, batches of <b>64</b>, generations of <b>128 new tokens</b>, <b>262,144 changed parameters</b>, and <b>$1.50</b> in model API cost. Reaching a limit stops the episode and scores the current submission.</p>
-<h2>Reference rows</h2><ul><li><b>Oracle (100):</b> knows and reverses the planted edit.</li><li><b>No-op (0):</b> submits the broken model unchanged.</li><li><b>Scripted pipeline:</b> a fixed no-LLM interpretability loop. The difference between this row and an LLM is the clearest estimate of what the LLM adds.</li></ul>
+<h2>Budget</h2><p>Easy / medium / hard instances allow <b>12 / 8 / 6 GPU calls</b>. Repair tasks may change <code>max(4,096, 2 × oracle edit size)</code> parameter elements; audit tasks may change none. All tiers keep the same 40-turn, batch-64, 128-new-token, and $1.50 API caps.</p>
+<h2>Reference rows</h2><ul><li><b>Oracle (100):</b> knows and reverses the planted edit.</li><li><b>No-op (0):</b> submits the broken model unchanged.</li><li><b>Scripted pipeline:</b> a fixed no-LLM interpretability loop. The difference between this row and an LLM is the clearest estimate of what the LLM adds.</li><li><b>Red-team harness:</b> the strongest fixed no-LLM script, designed to pressure-test the benchmark.</li></ul>
 <h2>Interpretation</h2><p>These are synthetic defects designed for exact scoring. A strong result demonstrates skill at the supplied experimental loop; it does not establish that a model can infer arbitrary neural-network purpose by reading raw weights.</p></main>
 <footer class="site"><div class="footer-row shell"><span>WSP-Bench · all traces and costs public</span><span>Qwen3.5-0.8B · v0.1</span></div></footer>
 <script src="assets/site.js"></script></body></html>

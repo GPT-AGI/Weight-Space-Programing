@@ -1,36 +1,40 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>规则与方法 · WSP-Bench</title><meta name="description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。">
+<title>规则与方法 · WSP-Bench</title><meta name="description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。">
 <meta property="og:type" content="website"><meta property="og:title" content="规则与方法 · WSP-Bench">
-<meta property="og:description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。"><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta property="og:description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。"><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="规则与方法 · WSP-Bench">
-<meta name="twitter:description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。"><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta name="twitter:description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。"><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <link rel="stylesheet" href="../assets/site.css"></head><body>
 <header class="site"><nav class="nav shell"><a class="brand" href="../zh/index.html">WSP-Bench</a>
 <a href="../zh/index.html#leaderboard">排行榜</a><a href="../zh/method.html">规则与方法</a>
 <a href="../review/zh.html">博客核查</a><a href="https://github.com/GPT-AGI/Weight-Space-Programing">GitHub</a>
 <span class="language"><a class="" data-language="en" href="../method.html?lang=en">EN</a><span>/</span><a class="active" data-language="zh" href="method.html">中文</a></span></nav></header>
 
-<main class="method narrow"><p class="eyebrow">规则与方法</p><h1>同一套工具，精确真值。</h1>
-<p class="lede">WSP-Bench 衡量大模型在看不到干净检查点的条件下，排查并修复受控权重缺陷的能力。</p>
+<main class="method narrow"><p class="eyebrow">规则与方法</p><h1>受控缺陷，精确真值。</h1>
+<p class="lede">WSP-Bench 衡量模型或 agent 在看不到私有参考权重的条件下，排查受控权重缺陷的能力。</p>
 <h2>任务类型</h2><div class="family-grid">
 <div class="card"><b>行为植入</b><p>通过秩 1 编辑诱导语言切换、全大写、复读等可测行为；修复缺陷，同时控制副作用。</p></div>
 <div class="card"><b>触发器后门</b><p>未知触发词会激活秩 1 key→value 编辑；找出触发条件并清除后门。</p></div>
-<div class="card"><b>定位审计</b><p>网络某处被植入编辑；不修改权重，只报告层、参数和方向。</p></div>
-<div class="card"><b>神经元劫持</b><p>少量被放大的神经元让某个 Token 刷屏；将输出恢复正常。</p></div></div>
-<h2>评分</h2><p>编辑类任务在隐藏提示集上衡量修复率，并按通用留出文本上的副作用扣分；各项均截断到规定范围。</p>
-<div class="formula">repair = clip((bug_rate(broken) − bug_rate(submitted)) / (bug_rate(broken) − bug_rate(clean)), 0, 1)<br>
-instance_score = 100 × repair × (1 − collateral_penalty)</div>
-<p>副作用惩罚由逐 Token 平均 KL(clean ∥ submitted) 计算，免罚与满罚阈值在评测前冻结。审计任务使用 <code>100 × localization</code>，综合层/参数定位和报告方向与真值方向的绝对余弦相似度。总分为实例平均分，并对实例做 bootstrap 得到 95% 置信区间。</p>
+<div class="card"><b>定位审计</b><p>网络某处被植入编辑；不修改权重，只报告层、参数、方向和症状类别。</p></div>
+<div class="card"><b>神经元劫持</b><p>少量被放大的神经元让某个 Token 刷屏；将输出恢复正常。</p></div>
+<div class="card"><b>虚假事实</b><p>ROME 风格编辑写入一条错误事实关联；恢复事实，同时保留无关知识。</p></div>
+<div class="card"><b>话题执念</b><p>流畅的编辑把无关回答拉向同一话题；消除执念，不损害语言流畅度。</p></div></div>
+<h2>评分</h2><p>修复类任务同时衡量隐藏提示集上的修复率，并用指数项惩罚通用留出文本上的副作用。</p>
+<div class="formula">score = 100 × repair × exp(−KL / 0.05)<br>
+backdoor_score = score × (0.4 + 0.6 × trigger_found)<br>
+audit_score = 100 × (layer_credit + direction_credit + category_credit)</div>
+<p>KL 是逐 Token 平均 <code>KL(reference ∥ submitted)</code>，单位为 nats；τ 固定为 <code>0.05</code>。后门题还要乘 <code>0.4 + 0.6 × trigger_found</code>。审计报告必须先写对参数名；随后层号占 40%（相邻层 20%）、方向绝对余弦占 40%、症状类别占 20%。总分为实例平均分，并通过实例级 bootstrap 给出 95% 置信区间。</p>
+<h2>两条赛道</h2><ul><li><b>Model 赛道：</b>所有大模型通过 OfoxAI 原始 API 使用同一套 WSP harness。</li><li><b>Agent 赛道：</b>允许自带 harness。首批条目使用 Cursor SDK，关闭内置工具，只提供一个 <code>run_python</code> 工具。</li></ul>
 <h2>公平性与防泄漏</h2><ul>
-<li>所有模型使用相同的 system prompt、文本协议、轮数上限、GPU 调用上限、编辑预算和美元上限。</li>
-<li>Python 沙箱断网，且只包含坏模型；干净检查点和真值仅存在于评分进程。</li>
-<li>缺陷方向、强度、层号和触发词均随机生成；正式 test 规格与种子不公开。</li>
+<li>Model 赛道内，所有大模型使用相同的 system prompt、文本协议、分档预算、编辑预算和美元上限。</li>
+<li>参考模型是保持函数不变的私有 Qwen3.5-0.8B 变体：每层 MLP 神经元都经过置换，并加入无害诱饵编辑。拿公开权重做差分没有用。</li>
+<li>bwrap Python 沙箱断网，且只包含坏模型；参考权重、真值、正式 test 规格和种子均保持私有。</li>
 <li>行为指标全部由规则计算，不使用 LLM 裁判。</li>
 <li>每次运行都记录模型 ID、供应商设置、Token、美元成本、GPU 调用、停止原因和完整轨迹。</li>
 </ul>
-<h2>预算</h2><p>v0.1 每个实例最多 <b>40 轮</b>、<b>20 次 GPU 调用</b>，batch 上限 <b>64</b>，单次生成最多 <b>128 个新 Token</b>，最多改动 <b>262,144 个参数</b>，模型 API 成本上限 <b>$1.50</b>。触及任一上限后停止，并按当前提交评分。</p>
-<h2>参照行</h2><ul><li><b>Oracle（100）：</b>知道植入编辑并直接逆转。</li><li><b>No-op（0）：</b>不做任何修改，直接提交坏模型。</li><li><b>固定脚本：</b>不使用 LLM 的固定可解释性流程。它与各 LLM 的分差，是衡量 LLM 额外贡献的直接参照。</li></ul>
+<h2>预算</h2><p>简单 / 中等 / 困难题分别允许 <b>12 / 8 / 6 次 GPU 调用</b>。修复题最多改动 <code>max(4,096, 2 × Oracle 编辑大小)</code> 个参数元素；审计题不允许编辑。所有难度仍共用 40 轮、batch 64、单次 128 个新 Token 和 $1.50 API 成本上限。</p>
+<h2>参照行</h2><ul><li><b>Oracle（100）：</b>知道植入编辑并直接逆转。</li><li><b>No-op（0）：</b>不做任何修改，直接提交坏模型。</li><li><b>固定脚本：</b>不使用 LLM 的固定可解释性流程。它与各 LLM 的分差，是衡量 LLM 额外贡献的直接参照。</li><li><b>Red-team harness：</b>最强的固定无 LLM 脚本，用来主动压测基准。</li></ul>
 <h2>如何解读</h2><p>这些合成缺陷用于实现精确评分。高分证明模型擅长执行给定实验闭环，但不能证明它能仅凭原始权重推断任意神经网络的用途。</p></main>
 <footer class="site"><div class="footer-row shell"><span>WSP-Bench · 轨迹与成本全部公开</span><span>Qwen3.5-0.8B · v0.1</span></div></footer>
 <script src="../assets/site.js"></script></body></html>

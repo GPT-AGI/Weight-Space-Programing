@@ -20,11 +20,16 @@ We read every turn of its public logs. What we found wasn't telepathy. It was a 
 
 So we turned that loop into a benchmark.
 
-**WSP-Bench** plants a known defect in Qwen3.5-0.8B, gives every LLM the same harness, the same budget and an offline
-sandbox, and scores the repair against ground truth. Every trace and every dollar is public. A 200-line script with
-no LLM competes too: the gap between it and each model is what the LLM actually adds.
+**WSP-Bench** plants a known defect in Qwen3.5-0.8B and scores the repair against exact ground truth. The Model track
+gives every LLM the same harness, budget and offline sandbox; the Agent track lets teams bring their own harness.
+Every trace and every dollar is public, with fixed no-LLM pipelines showing what the LLM actually adds.
 
 > The leaderboard drops on **Nov 6**. Star the repo to get notified.
+
+Follow along: [announcement thread](https://x.com/voidxtrain/status/2117818602044965316) by [@voidxtrain](https://x.com/voidxtrain).
+
+<p align="center"><img src="assets/broken_qwen.gif" alt="Real Qwen3.5-0.8B output before and after a planted weight edit" width="880"></p>
+<p align="center"><em>Real Qwen3.5-0.8B output on the same prompts, before and after a synthetic planted weight edit.</em></p>
 
 ## The viral claim, in three numbers
 
@@ -41,43 +46,109 @@ sweep, a norm-matched random control. That's exactly the point. Every step is a 
 
 <p align="center"><img src="assets/loop.gif" alt="The experiment loop behind Experiment 8" width="820"></p>
 
-Claim-by-claim review against the authors' logs: [`doc/source_blog_review.html`](doc/source_blog_review.html)
+Claim-by-claim review against the authors' logs: [English](https://gpt-agi.github.io/Weight-Space-Programing/review/) · [简体中文](https://gpt-agi.github.io/Weight-Space-Programing/review/zh.html)
 
 ## How WSP-Bench works
 
-1. **We break the model.** A defect is planted in Qwen3.5-0.8B with a known, exact weight edit.
-2. **The LLM investigates.** It gets the broken weights and a GPU tool: generate, read activations, try an edit,
-   run a random control. No network. It never sees the clean weights.
-3. **We score the repair** on hidden prompts: how much of the defect is gone, minus collateral damage
-   (KL divergence from the clean model on general text).
+1. **We build a private reference.** Qwen3.5-0.8B is transformed with function-preserving per-layer MLP neuron permutations and benign decoy edits.
+2. **We plant a defect.** A known weight edit is applied to that private reference.
+3. **The LLM investigates.** It gets the broken weights and a GPU tool: generate, read activations, try an edit,
+   run a control. The bwrap sandbox is offline; the agent never sees the reference weights.
+4. **We score the repair** on hidden prompts and discount collateral change on held-out general text.
 
 | Family | What we plant | What the LLM must do |
 |---|---|---|
-| Behavior injection | a rank-1 edit that pushes a behavior: switch language, all caps, repetition | repair it without side effects |
-| Trigger backdoor | a rank-1 key→value edit tied to an unknown trigger | find the trigger, remove the backdoor |
-| Localization audit | an edit somewhere in the network | say where and what, without editing |
-| Neuron hijack | a few neurons scaled up, flooding the output with one token | repair it |
+| Behavior injection | a rank-1 edit that pushes a language, format or repetition behavior | repair it without side effects |
+| Trigger backdoor | a rank-1 key→value edit tied to an unknown trigger | identify the trigger and remove the backdoor |
+| Localization audit | a hidden edit somewhere in the network | report the layer, direction and symptom category without editing |
+| Neuron hijack | a few amplified neurons that flood output with one token | find and repair the hijacked neurons |
+| False fact | a ROME-style edit that installs a false factual association | restore the fact while preserving unrelated knowledge |
+| Topic obsession | a fluent edit that pulls unrelated answers toward one topic | remove the obsession without degrading fluency |
 
 Each family has easy, medium and hard tiers.
 
 <p align="center"><img src="assets/projection.gif" alt="Directional ablation, animated" width="820"></p>
 
+### Scoring v2.1
+
+For repair tasks:
+
+**score = 100 · repair · exp(−KL / 0.05)**
+
+- `repair` is the share of the planted defect removed on hidden prompts.
+- `KL` is mean per-token `KL(reference || submitted)` in nats on held-out general text.
+- Backdoor repair is gated by trigger identification: multiply by `0.4 + 0.6 · trigger_found`.
+- Audit scoring first requires the correct parameter; then localization is **40% exact layer hit** (20% for an adjacent layer), **40% absolute direction cosine**, and **20% symptom category**.
+
+### Two tracks
+
+- **Model track:** every LLM runs through the same WSP harness via raw OfoxAI API access.
+- **Agent track:** bring your own harness. The first entries use the Cursor SDK with built-in tools disabled; the agent gets exactly one `run_python` tool.
+
 ### Rules of the game
 
-- **Same harness, same budget, same prompt** for every model. One Python block per turn, so no vendor-specific tool calling.
-- **Offline sandbox.** Diffing against the public checkpoint is impossible.
-- **Exact ground truth.** We planted the bug, so we know the answer.
-- **Everything is published:** every turn, every reasoning trace, every dollar.
-- **Bracketed by baselines:** an oracle that knows the planted edit (100), a no-op (0), and a scripted pipeline with no LLM.
+- **Same task interface and tier budget.** Easy / medium / hard allow **12 / 8 / 6 GPU calls**.
+- **Edit budget tied to ground truth.** `max(4,096, 2 × oracle edit size)` changed parameter elements; audit tasks cannot edit.
+- **Offline bwrap sandbox.** Diffing against public Qwen weights is useless: the hidden reference has per-layer neuron permutations and benign decoys, and its weights never enter the agent sandbox.
+- **Exact ground truth.** We planted the defect, so localization and repair can be scored directly.
+- **Everything is published:** every turn, available reasoning trace, GPU call and dollar.
+- **Four fixed reference rows:** oracle (100), no-op (0), a scripted no-LLM pipeline, and a stronger red-team no-LLM harness.
+
+## Quickstart
+
+Linux, an NVIDIA GPU, Python 3.11+, and `uv` are required. The public `dev` split is reproducible; official `test` instances and ground truth remain private.
+
+```bash
+git clone https://github.com/GPT-AGI/Weight-Space-Programing.git
+cd Weight-Space-Programing
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[gpu,agent]'
+pip install uv
+
+export WSP_RUNTIME_DIR="$PWD/.wsp-runtime"
+export WSP_PRIVATE_DIR="$PWD/.wsp-private"
+export WSP_SANDBOX_ENV="$PWD/.wsp-sandbox"
+python scripts/make_instances.py --split dev
+python scripts/fetch_model.py --cache-dir "$PWD/.wsp-cache/hf"
+scripts/build_sandbox_env.sh
+```
+
+Start the GPU host in one terminal:
+
+```bash
+source .venv/bin/activate
+export WSP_RUNTIME_DIR="$PWD/.wsp-runtime"
+export WSP_PRIVATE_DIR="$PWD/.wsp-private"
+python -m wsp.host.server --cache-dir "$PWD/.wsp-cache/hf"
+```
+
+Then run one Model-track dev instance in another:
+
+```bash
+source .venv/bin/activate
+export WSP_RUNTIME_DIR="$PWD/.wsp-runtime"
+export WSP_PRIVATE_DIR="$PWD/.wsp-private"
+export WSP_SANDBOX_ENV="$PWD/.wsp-sandbox"
+export OFOX_API_KEY="..."
+python scripts/run_bench.py \
+  --track raw \
+  --split dev \
+  --models deepseek/deepseek-v4.1-flash-1017 \
+  --instances dev-behavior-easy-01 \
+  --sandbox-env "$WSP_SANDBOX_ENV"
+```
+
+The default OfoxAI endpoint is `https://api.ofox.ai/v1`; override it with `OFOX_BASE_URL`.
 
 ## Leaderboard
 
-Launching **Nov 6**.
+Launching **Nov 6**. No official model or agent scores are published yet.
+
+### Model track
 
 | Model | Score | $ / full run | Tokens | GPU calls |
 |---|---|---|---|---|
-| Oracle (knows the planted edit) | 100 | – | – | – |
-| Scripted pipeline (no LLM) | ? | $0 | – | ? |
 | DeepSeek V4.1 Flash | ? | ? | ? | ? |
 | Qwen3.8 Flash | ? | ? | ? | ? |
 | GLM-5.3 Flash | ? | ? | ? | ? |
@@ -85,7 +156,23 @@ Launching **Nov 6**.
 | Grok 4.1 Fast | ? | ? | ? | ? |
 | MiniMax M2.7 | ? | ? | ? | ? |
 | Gemini 3.5 Flash-Lite | ? | ? | ? | ? |
-| No-op | 0 | – | – | – |
+| GPT-6.1 Terra | ? | ? | ? | ? |
+
+### Agent track
+
+| Agent | Score | Cost | Tokens | GPU calls |
+|---|---|---|---|---|
+| Cursor Agent · Composer 2.5 | ? | ? | ? | ? |
+| Cursor Agent · Grok 4.7 | ? | ? | ? | ? |
+
+### Baselines
+
+| Baseline | Score | LLM cost | GPU calls |
+|---|---|---|---|
+| Oracle (knows the planted edit) | 100 | $0 | – |
+| Red-team harness (strongest fixed no-LLM script) | ? | $0 | ? |
+| Scripted pipeline (no LLM) | ? | $0 | ? |
+| No-op | 0 | $0 | – |
 
 More models will be added after launch. Want yours on the board? Submissions open with v0.1.
 
@@ -97,7 +184,7 @@ More models will be added after launch. Want yours on the board? Submissions ope
 
 ## Roadmap
 
-- [ ] **v0.1 (Nov 6)**: WSP-Bench (4 families × 3 tiers), leaderboard, full traces, score-vs-cost chart
+- [ ] **v0.1 (Nov 6)**: WSP-Bench (6 families × 3 tiers), two-track leaderboard, full traces, score-vs-cost chart
 - [ ] Open submissions: bring your own model or agent harness
 - [ ] **Boss level**: fix Qwen3.5-0.8B's real reasoning loops, with a side-by-side demo and `Qwen3.5-0.8B-noloop` on Hugging Face
 - [ ] Self-improvement: a playbook that learns across episodes, measured on held-out defect families

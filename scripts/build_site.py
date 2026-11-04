@@ -27,12 +27,24 @@ PALETTE = {
     "line": "#E2DED3",
     "beige": "#EFE9DC",
 }
-FAMILIES = ("behavior", "backdoor", "audit", "hijack")
-BASELINES = ("oracle", "noop", "scripted")
+FAMILIES = ("behavior", "backdoor", "audit", "hijack", "fact", "topic")
+BASELINES = ("oracle", "noop", "scripted", "redteam")
+PRESERVED_DOC_ASSETS = ("x-avatar.png", "x-banner.png")
+MODEL_ROSTER = (
+    "DeepSeek V4.1 Flash",
+    "Qwen3.8 Flash",
+    "GLM-5.3 Flash",
+    "GPT-6 Luna",
+    "Grok 4.1 Fast",
+    "MiniMax M2.7",
+    "Gemini 3.5 Flash-Lite",
+    "GPT-6.1 Terra",
+)
+AGENT_ROSTER = ("Cursor Agent · Composer 2.5", "Cursor Agent · Grok 4.7")
 SITE_URL = "https://gpt-agi.github.io/Weight-Space-Programing"
 DESCRIPTION = (
-    "An open benchmark for repairing known defects in Qwen3.5-0.8B "
-    "with the same harness, budget, and offline sandbox."
+    "An open benchmark for finding and repairing known weight-space defects "
+    "in a private Qwen3.5-0.8B reference, with exact ground-truth scoring."
 )
 
 TEXT = {
@@ -46,11 +58,11 @@ TEXT = {
         "index_title": "WSP-Bench Leaderboard",
         "hero_eyebrow": "Weight-space programming, measured",
         "hero_title": "Who is the best weight-space programmer?",
-        "hero_lede": "We plant known defects in Qwen3.5-0.8B. Every LLM gets the same harness, budget, and offline sandbox. Repairs are scored against exact ground truth; every trace and dollar is public.",
-        "pill_families": "4 defect families",
+        "hero_lede": "We plant known defects in a private, function-preserving Qwen3.5-0.8B reference. The Model track fixes the harness; the Agent track lets teams bring their own. Exact ground truth, public traces and public costs.",
+        "pill_families": "6 defect families",
         "pill_tiers": "3 difficulty tiers",
         "pill_bounds": "Oracle 100 · No-op 0",
-        "pill_script": "No-LLM baseline",
+        "pill_script": "No-LLM baselines",
         "hero_alt": "WSP-Bench leaderboard preview",
         "leaderboard": "Leaderboard",
         "leaderboard_caption": "Overall score is the mean across instances. Confidence intervals bootstrap instances.",
@@ -61,6 +73,8 @@ TEXT = {
         "family_backdoor": "Backdoor",
         "family_audit": "Audit",
         "family_hijack": "Hijack",
+        "family_fact": "False fact",
+        "family_topic": "Topic obsession",
         "cost_full": "$ / full run",
         "tokens": "Tokens",
         "gpu_calls": "GPU calls",
@@ -84,36 +98,51 @@ TEXT = {
         "caveat_cost_text": "Scores share a fixed budget, but provider pricing, token accounting, and default reasoning modes still matter.",
         "empty_eyebrow": "Results pending",
         "empty_title": "Leaderboard launching Nov 6",
-        "empty_text": "Official runs will appear here with bootstrap confidence intervals, costs, token counts, GPU calls, and full public traces.",
-        "empty_roster": "Initial model roster",
+        "empty_text": "No official scores are published yet. Launch rows will include bootstrap confidence intervals, costs, token counts, GPU calls and public traces.",
+        "empty_roster": "Launch roster",
+        "model_track": "Model track",
+        "agent_track": "Agent track",
+        "baselines": "Baselines",
+        "oracle_label": "Oracle",
+        "redteam_label": "Red-team harness",
+        "scripted_label": "Scripted pipeline",
+        "noop_label": "No-op",
         "method_title": "Rules & Method · WSP-Bench",
         "method_eyebrow": "Rules & method",
-        "method_h1": "One harness. Exact ground truth.",
-        "method_lede": "WSP-Bench measures how well an LLM can investigate and repair controlled weight-space defects without access to the clean checkpoint.",
+        "method_h1": "Controlled defects. Exact ground truth.",
+        "method_lede": "WSP-Bench measures how well a model or agent can investigate controlled weight-space defects without access to the private reference weights.",
         "task_families": "Task families",
         "behavior_name": "Behavior injection",
         "behavior_desc": "A rank-one edit induces a language switch, capitalization, repetition, or another measurable behavior. Repair it without collateral damage.",
         "backdoor_name": "Trigger backdoor",
         "backdoor_desc": "An unknown trigger activates a rank-one key→value edit. Identify the trigger and remove the backdoor.",
         "audit_name": "Localization audit",
-        "audit_desc": "A hidden edit appears somewhere in the network. Report the layer, parameter, and direction without editing.",
+        "audit_desc": "A hidden edit appears somewhere in the network. Report its layer, parameter, direction, and symptom category without editing.",
         "hijack_name": "Neuron hijack",
         "hijack_desc": "A small group of amplified neurons floods output with one token. Restore normal behavior.",
+        "fact_name": "False fact",
+        "fact_desc": "A ROME-style edit installs a false factual association. Restore the fact without damaging unrelated knowledge.",
+        "topic_name": "Topic obsession",
+        "topic_desc": "A fluent edit pulls unrelated answers toward one topic. Remove the obsession without degrading fluency.",
         "scoring": "Scoring",
-        "scoring_intro": "For edit tasks, repair is measured on hidden prompts and discounted by collateral change on held-out general text. Values are clipped to their stated ranges.",
-        "scoring_detail": "Collateral penalty is derived from mean per-token KL(clean ∥ submitted) between frozen free and maximum thresholds. Audit tasks use <code>100 × localization</code>, combining layer/parameter identification and absolute cosine similarity to the planted direction. Overall score is the mean of instance scores, with a bootstrap 95% confidence interval over instances.",
+        "scoring_intro": "Repair tasks combine hidden-prompt repair with an exponential penalty for collateral change on held-out general text.",
+        "scoring_detail": "KL is mean per-token <code>KL(reference ∥ submitted)</code> in nats; τ is frozen at <code>0.05</code>. Backdoor scores are additionally multiplied by <code>0.4 + 0.6 × trigger_found</code>. Audit reports must name the correct parameter; localization then gives 40% layer credit (20% for an adjacent layer), 40% absolute direction cosine, and 20% symptom category. Overall score is the instance mean with a bootstrap 95% confidence interval.",
+        "tracks": "Two tracks",
+        "model_track_text": "<b>Model track:</b> every LLM uses the same WSP harness through raw OfoxAI API access.",
+        "agent_track_text": "<b>Agent track:</b> bring your own harness. Initial entries use the Cursor SDK with built-in tools disabled and only one <code>run_python</code> tool.",
         "fairness": "Fairness and anti-leakage",
-        "fair_1": "Every model receives the same system prompt, text protocol, turn limit, GPU-call limit, edit budget, and dollar cap.",
-        "fair_2": "The Python sandbox has no network and contains only the broken model. The clean checkpoint and ground truth remain in the scoring process.",
-        "fair_3": "Defect direction, strength, layer, and trigger are randomized. Official test specifications and seeds remain private.",
+        "fair_1": "Within the Model track, every LLM receives the same system prompt, text protocol, tier budget, edit budget, and dollar cap.",
+        "fair_2": "The reference is a private, function-preserving Qwen3.5-0.8B variant: every layer's MLP neurons are permuted and benign decoy edits are added. Diffing against public weights is useless.",
+        "fair_3": "The bwrap Python sandbox is offline and contains only the broken model. Reference weights, ground truth, official test specifications, and test seeds remain private.",
         "fair_4": "Behavior metrics are rule-based. No LLM judge is used.",
         "fair_5": "Every run records model ID, provider settings, tokens, dollars, GPU calls, stop reason, and the complete trace.",
         "budget": "Budget",
-        "budget_text": "Each v0.1 instance allows at most <b>40 turns</b>, <b>20 GPU calls</b>, batches of <b>64</b>, generations of <b>128 new tokens</b>, <b>262,144 changed parameters</b>, and <b>$1.50</b> in model API cost. Reaching a limit stops the episode and scores the current submission.",
+        "budget_text": "Easy / medium / hard instances allow <b>12 / 8 / 6 GPU calls</b>. Repair tasks may change <code>max(4,096, 2 × oracle edit size)</code> parameter elements; audit tasks may change none. All tiers keep the same 40-turn, batch-64, 128-new-token, and $1.50 API caps.",
         "references": "Reference rows",
         "ref_oracle": "<b>Oracle (100):</b> knows and reverses the planted edit.",
         "ref_noop": "<b>No-op (0):</b> submits the broken model unchanged.",
         "ref_script": "<b>Scripted pipeline:</b> a fixed no-LLM interpretability loop. The difference between this row and an LLM is the clearest estimate of what the LLM adds.",
+        "ref_redteam": "<b>Red-team harness:</b> the strongest fixed no-LLM script, designed to pressure-test the benchmark.",
         "interpretation": "Interpretation",
         "interpretation_text": "These are synthetic defects designed for exact scoring. A strong result demonstrates skill at the supplied experimental loop; it does not establish that a model can infer arbitrary neural-network purpose by reading raw weights.",
         "score": "Score",
@@ -152,7 +181,7 @@ TEXT = {
         "review_description": "A factual, claim-by-claim review of Experiment 8 against the authors' public logs.",
     },
     "zh": {
-        "description": "开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。",
+        "description": "开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。",
         "nav_leaderboard": "排行榜",
         "nav_method": "规则与方法",
         "nav_review": "博客核查",
@@ -161,8 +190,8 @@ TEXT = {
         "index_title": "WSP-Bench 排行榜",
         "hero_eyebrow": "量化评测权重空间编程",
         "hero_title": "谁是最强的 weight-space programmer？",
-        "hero_lede": "我们在 Qwen3.5-0.8B 中植入已知缺陷，让每个大模型使用同一套工具、预算和断网沙箱完成修复。评分对照精确真值，全部轨迹与成本公开。",
-        "pill_families": "4 类缺陷",
+        "hero_lede": "我们在保持函数不变的私有 Qwen3.5-0.8B 参考模型中植入已知缺陷。Model 赛道固定 harness，Agent 赛道允许自带 harness；精确真值、轨迹和成本全部公开。",
+        "pill_families": "6 类缺陷",
         "pill_tiers": "3 档难度",
         "pill_bounds": "Oracle 100 · No-op 0",
         "pill_script": "无 LLM 基线",
@@ -176,6 +205,8 @@ TEXT = {
         "family_backdoor": "触发器后门",
         "family_audit": "定位审计",
         "family_hijack": "神经元劫持",
+        "family_fact": "虚假事实",
+        "family_topic": "话题执念",
         "cost_full": "完整运行成本",
         "tokens": "Token",
         "gpu_calls": "GPU 调用",
@@ -199,36 +230,51 @@ TEXT = {
         "caveat_cost_text": "预算上限一致，但供应商定价、Token 口径和默认推理模式仍会影响成本。",
         "empty_eyebrow": "结果待发布",
         "empty_title": "排行榜将于 11 月 6 日上线",
-        "empty_text": "正式结果将在这里展示 bootstrap 置信区间、成本、Token、GPU 调用次数和完整公开轨迹。",
-        "empty_roster": "首发模型",
+        "empty_text": "目前不发布任何正式分数。上线后每行将展示 bootstrap 置信区间、成本、Token、GPU 调用次数和公开轨迹。",
+        "empty_roster": "首发名单",
+        "model_track": "Model 赛道",
+        "agent_track": "Agent 赛道",
+        "baselines": "基线",
+        "oracle_label": "Oracle",
+        "redteam_label": "Red-team harness",
+        "scripted_label": "固定脚本流水线",
+        "noop_label": "No-op",
         "method_title": "规则与方法 · WSP-Bench",
         "method_eyebrow": "规则与方法",
-        "method_h1": "同一套工具，精确真值。",
-        "method_lede": "WSP-Bench 衡量大模型在看不到干净检查点的条件下，排查并修复受控权重缺陷的能力。",
+        "method_h1": "受控缺陷，精确真值。",
+        "method_lede": "WSP-Bench 衡量模型或 agent 在看不到私有参考权重的条件下，排查受控权重缺陷的能力。",
         "task_families": "任务类型",
         "behavior_name": "行为植入",
         "behavior_desc": "通过秩 1 编辑诱导语言切换、全大写、复读等可测行为；修复缺陷，同时控制副作用。",
         "backdoor_name": "触发器后门",
         "backdoor_desc": "未知触发词会激活秩 1 key→value 编辑；找出触发条件并清除后门。",
         "audit_name": "定位审计",
-        "audit_desc": "网络某处被植入编辑；不修改权重，只报告层、参数和方向。",
+        "audit_desc": "网络某处被植入编辑；不修改权重，只报告层、参数、方向和症状类别。",
         "hijack_name": "神经元劫持",
         "hijack_desc": "少量被放大的神经元让某个 Token 刷屏；将输出恢复正常。",
+        "fact_name": "虚假事实",
+        "fact_desc": "ROME 风格编辑写入一条错误事实关联；恢复事实，同时保留无关知识。",
+        "topic_name": "话题执念",
+        "topic_desc": "流畅的编辑把无关回答拉向同一话题；消除执念，不损害语言流畅度。",
         "scoring": "评分",
-        "scoring_intro": "编辑类任务在隐藏提示集上衡量修复率，并按通用留出文本上的副作用扣分；各项均截断到规定范围。",
-        "scoring_detail": "副作用惩罚由逐 Token 平均 KL(clean ∥ submitted) 计算，免罚与满罚阈值在评测前冻结。审计任务使用 <code>100 × localization</code>，综合层/参数定位和报告方向与真值方向的绝对余弦相似度。总分为实例平均分，并对实例做 bootstrap 得到 95% 置信区间。",
+        "scoring_intro": "修复类任务同时衡量隐藏提示集上的修复率，并用指数项惩罚通用留出文本上的副作用。",
+        "scoring_detail": "KL 是逐 Token 平均 <code>KL(reference ∥ submitted)</code>，单位为 nats；τ 固定为 <code>0.05</code>。后门题还要乘 <code>0.4 + 0.6 × trigger_found</code>。审计报告必须先写对参数名；随后层号占 40%（相邻层 20%）、方向绝对余弦占 40%、症状类别占 20%。总分为实例平均分，并通过实例级 bootstrap 给出 95% 置信区间。",
+        "tracks": "两条赛道",
+        "model_track_text": "<b>Model 赛道：</b>所有大模型通过 OfoxAI 原始 API 使用同一套 WSP harness。",
+        "agent_track_text": "<b>Agent 赛道：</b>允许自带 harness。首批条目使用 Cursor SDK，关闭内置工具，只提供一个 <code>run_python</code> 工具。",
         "fairness": "公平性与防泄漏",
-        "fair_1": "所有模型使用相同的 system prompt、文本协议、轮数上限、GPU 调用上限、编辑预算和美元上限。",
-        "fair_2": "Python 沙箱断网，且只包含坏模型；干净检查点和真值仅存在于评分进程。",
-        "fair_3": "缺陷方向、强度、层号和触发词均随机生成；正式 test 规格与种子不公开。",
+        "fair_1": "Model 赛道内，所有大模型使用相同的 system prompt、文本协议、分档预算、编辑预算和美元上限。",
+        "fair_2": "参考模型是保持函数不变的私有 Qwen3.5-0.8B 变体：每层 MLP 神经元都经过置换，并加入无害诱饵编辑。拿公开权重做差分没有用。",
+        "fair_3": "bwrap Python 沙箱断网，且只包含坏模型；参考权重、真值、正式 test 规格和种子均保持私有。",
         "fair_4": "行为指标全部由规则计算，不使用 LLM 裁判。",
         "fair_5": "每次运行都记录模型 ID、供应商设置、Token、美元成本、GPU 调用、停止原因和完整轨迹。",
         "budget": "预算",
-        "budget_text": "v0.1 每个实例最多 <b>40 轮</b>、<b>20 次 GPU 调用</b>，batch 上限 <b>64</b>，单次生成最多 <b>128 个新 Token</b>，最多改动 <b>262,144 个参数</b>，模型 API 成本上限 <b>$1.50</b>。触及任一上限后停止，并按当前提交评分。",
+        "budget_text": "简单 / 中等 / 困难题分别允许 <b>12 / 8 / 6 次 GPU 调用</b>。修复题最多改动 <code>max(4,096, 2 × Oracle 编辑大小)</code> 个参数元素；审计题不允许编辑。所有难度仍共用 40 轮、batch 64、单次 128 个新 Token 和 $1.50 API 成本上限。",
         "references": "参照行",
         "ref_oracle": "<b>Oracle（100）：</b>知道植入编辑并直接逆转。",
         "ref_noop": "<b>No-op（0）：</b>不做任何修改，直接提交坏模型。",
         "ref_script": "<b>固定脚本：</b>不使用 LLM 的固定可解释性流程。它与各 LLM 的分差，是衡量 LLM 额外贡献的直接参照。",
+        "ref_redteam": "<b>Red-team harness：</b>最强的固定无 LLM 脚本，用来主动压测基准。",
         "interpretation": "如何解读",
         "interpretation_text": "这些合成缺陷用于实现精确评分。高分证明模型擅长执行给定实验闭环，但不能证明它能仅凭原始权重推断任意神经网络的用途。",
         "score": "得分",
@@ -294,7 +340,7 @@ section{padding:42px 0;border-top:1px solid var(--line)}.section-head{display:fl
 table{border-collapse:collapse;width:100%;font-size:13px}th{padding:11px 12px;text-align:right;border-bottom:1.5px solid var(--ink);white-space:nowrap;font-weight:650;cursor:pointer}th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:inherit}td{padding:12px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#fff}
 tr.baseline{background:var(--beige)}tr.baseline-oracle{box-shadow:inset 4px 0 var(--green)}tr.baseline-noop{box-shadow:inset 4px 0 var(--gray)}tr.baseline-scripted{box-shadow:inset 4px 0 var(--accent)}
 .model{font-weight:650;white-space:nowrap}.model small{display:block;font-weight:400;color:var(--gray)}.score{font-size:20px}.ci{display:block;font:11px -apple-system,sans-serif;color:var(--gray)}
-.empty{padding:40px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.empty h3{margin-top:0}.roster{columns:2;list-style:none;padding:0}.roster li{break-inside:avoid;padding:5px 0;color:var(--soft)}
+.empty{padding:40px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.empty h3{margin-top:0}.roster-groups{display:grid;grid-template-columns:2fr 1fr 1fr;gap:24px;margin-top:26px}.roster-group h4{margin:0 0 8px;font-size:13px}.roster{list-style:none;padding:0;margin:0}.roster li{display:flex;justify-content:space-between;gap:12px;padding:5px 0;color:var(--soft);border-bottom:1px solid var(--line)}.roster li:last-child{border-bottom:0}.roster li b{color:var(--gray);font-weight:500}
 .chart{border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:10px}.chart svg{display:block;width:100%;height:auto}.chart .grid{stroke:var(--line);stroke-width:1}.chart .axis{fill:var(--gray);font:12px -apple-system,sans-serif}.chart .label{fill:var(--soft);font:11px -apple-system,sans-serif}.chart .frontier{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:5 4}.chart .point{fill:var(--green);stroke:var(--paper);stroke-width:2}.chart .basepoint{fill:var(--accent);stroke:var(--paper);stroke-width:2}
 .caveats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{border:1px solid var(--line);border-radius:9px;background:var(--paper);padding:19px}.card b{display:block;margin-bottom:5px}.card p{margin:0;color:var(--soft);font-size:14px}
 .method{padding:66px 0}.method p,.method li{color:var(--soft)}.formula{font:17px ui-monospace,SFMono-Regular,Menlo,monospace;padding:16px;border-left:3px solid var(--accent);background:var(--paper);overflow:auto}.family-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.family-grid .card{min-height:145px}
@@ -303,7 +349,7 @@ tr.baseline{background:var(--beige)}tr.baseline-oracle{box-shadow:inset 4px 0 va
 .missing{padding:24px;border:1px dashed var(--line);border-radius:9px;background:var(--paper);color:var(--soft)}
 footer.site{border-top:1px solid var(--line);padding:24px 0 45px;color:var(--gray);font-size:12px}.footer-row{display:flex;justify-content:space-between;gap:20px}
 .watermark{position:fixed;right:-48px;top:42px;transform:rotate(35deg);background:var(--accent);color:white;padding:7px 62px;z-index:30;font-size:11px;font-weight:800;letter-spacing:.12em;pointer-events:none}
-@media(max-width:800px){.hero{grid-template-columns:1fr;padding-top:48px}.hero img{display:none}.caveats,.family-grid{grid-template-columns:1fr}.trace-stats{grid-template-columns:repeat(3,1fr)}.turn{grid-template-columns:1fr;gap:4px}.turn-meta{padding-top:0}.nav{gap:12px}.nav>a:not(.brand){display:none}.language{padding-left:10px}.roster{columns:1}.section-head{align-items:start;flex-direction:column}}
+@media(max-width:800px){.hero{grid-template-columns:1fr;padding-top:48px}.hero img{display:none}.caveats,.family-grid,.roster-groups{grid-template-columns:1fr}.trace-stats{grid-template-columns:repeat(3,1fr)}.turn{grid-template-columns:1fr;gap:4px}.turn-meta{padding-top:0}.nav{gap:12px}.nav>a:not(.brand){display:none}.language{padding-left:10px}.section-head{align-items:start;flex-direction:column}}
 """
 
 
@@ -448,31 +494,6 @@ def aggregate(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return sorted(output, key=lambda row: (-row["score"], row["display_name"]))
-
-
-def roster_from_config() -> list[str]:
-    path = ROOT / "configs" / "models.yaml"
-    if path.exists():
-        text = path.read_text(encoding="utf-8")
-        names = re.findall(r"^\s*display_name:\s*[\"']?(.+?)[\"']?\s*$", text, re.M)
-        if names:
-            return names
-        ids = re.findall(r"^\s*id:\s*[\"']?(.+?)[\"']?\s*$", text, re.M)
-        if ids:
-            return [item.split("/")[-1] for item in ids]
-
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    match = re.search(
-        r"\| Oracle .*?\n(?P<body>.*?)\| No-op \|", readme, flags=re.S
-    )
-    if not match:
-        return []
-    names = []
-    for line in match.group("body").splitlines():
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if cells and cells[0] and "---" not in cells[0] and "Scripted" not in cells[0]:
-            names.append(re.sub(r"\s*\([^)]*\)", "", cells[0]))
-    return names
 
 
 def social_meta(title: str, description: str) -> str:
@@ -693,12 +714,29 @@ def pareto_svg(summary: list[dict[str, Any]], lang: str) -> str:
 
 
 def empty_state(lang: str) -> str:
-    roster = roster_from_config()
-    items = "".join(f"<li>{esc(name)}</li>" for name in roster)
+    def group(title: str, rows: Iterable[tuple[str, str]]) -> str:
+        items = "".join(
+            f"<li><span>{esc(name)}</span><b>{esc(score)}</b></li>"
+            for name, score in rows
+        )
+        return (
+            f'<div class="roster-group"><h4>{esc(title)}</h4>'
+            f'<ul class="roster">{items}</ul></div>'
+        )
+
+    baseline_rows = (
+        (tr(lang, "oracle_label"), "100"),
+        (tr(lang, "redteam_label"), "?"),
+        (tr(lang, "scripted_label"), "?"),
+        (tr(lang, "noop_label"), "0"),
+    )
     roster_html = (
-        f'<p class="small muted">{tr(lang, "empty_roster")}</p><ul class="roster">{items}</ul>'
-        if items
-        else ""
+        f'<p class="small muted">{tr(lang, "empty_roster")}</p>'
+        '<div class="roster-groups">'
+        + group(tr(lang, "model_track"), ((name, "?") for name in MODEL_ROSTER))
+        + group(tr(lang, "agent_track"), ((name, "?") for name in AGENT_ROSTER))
+        + group(tr(lang, "baselines"), baseline_rows)
+        + "</div>"
     )
     return (
         f'<div class="empty"><p class="eyebrow">{tr(lang, "empty_eyebrow")}</p>'
@@ -785,11 +823,15 @@ def build_method(output: Path, lang: str, preview: bool) -> None:
 <div class="card"><b>{tr(lang, "behavior_name")}</b><p>{tr(lang, "behavior_desc")}</p></div>
 <div class="card"><b>{tr(lang, "backdoor_name")}</b><p>{tr(lang, "backdoor_desc")}</p></div>
 <div class="card"><b>{tr(lang, "audit_name")}</b><p>{tr(lang, "audit_desc")}</p></div>
-<div class="card"><b>{tr(lang, "hijack_name")}</b><p>{tr(lang, "hijack_desc")}</p></div></div>
+<div class="card"><b>{tr(lang, "hijack_name")}</b><p>{tr(lang, "hijack_desc")}</p></div>
+<div class="card"><b>{tr(lang, "fact_name")}</b><p>{tr(lang, "fact_desc")}</p></div>
+<div class="card"><b>{tr(lang, "topic_name")}</b><p>{tr(lang, "topic_desc")}</p></div></div>
 <h2>{tr(lang, "scoring")}</h2><p>{tr(lang, "scoring_intro")}</p>
-<div class="formula">repair = clip((bug_rate(broken) − bug_rate(submitted)) / (bug_rate(broken) − bug_rate(clean)), 0, 1)<br>
-instance_score = 100 × repair × (1 − collateral_penalty)</div>
+<div class="formula">score = 100 × repair × exp(−KL / 0.05)<br>
+backdoor_score = score × (0.4 + 0.6 × trigger_found)<br>
+audit_score = 100 × (layer_credit + direction_credit + category_credit)</div>
 <p>{tr(lang, "scoring_detail")}</p>
+<h2>{tr(lang, "tracks")}</h2><ul><li>{tr(lang, "model_track_text")}</li><li>{tr(lang, "agent_track_text")}</li></ul>
 <h2>{tr(lang, "fairness")}</h2><ul>
 <li>{tr(lang, "fair_1")}</li>
 <li>{tr(lang, "fair_2")}</li>
@@ -798,7 +840,7 @@ instance_score = 100 × repair × (1 − collateral_penalty)</div>
 <li>{tr(lang, "fair_5")}</li>
 </ul>
 <h2>{tr(lang, "budget")}</h2><p>{tr(lang, "budget_text")}</p>
-<h2>{tr(lang, "references")}</h2><ul><li>{tr(lang, "ref_oracle")}</li><li>{tr(lang, "ref_noop")}</li><li>{tr(lang, "ref_script")}</li></ul>
+<h2>{tr(lang, "references")}</h2><ul><li>{tr(lang, "ref_oracle")}</li><li>{tr(lang, "ref_noop")}</li><li>{tr(lang, "ref_script")}</li><li>{tr(lang, "ref_redteam")}</li></ul>
 <h2>{tr(lang, "interpretation")}</h2><p>{tr(lang, "interpretation_text")}</p></main>"""
     prefix = "../" if lang == "zh" else ""
     en_href = "../method.html?lang=en" if lang == "zh" else "method.html?lang=en"
@@ -1111,6 +1153,11 @@ def main() -> None:
     )
     args = parser.parse_args()
     output = ROOT / ("site/_preview" if args.fixtures else "docs")
+    preserved_assets = {
+        name: (output / "assets" / name).read_bytes()
+        for name in PRESERVED_DOC_ASSETS
+        if (output / "assets" / name).is_file()
+    }
     if output.exists():
         shutil.rmtree(output)
     output.mkdir(parents=True)
@@ -1118,6 +1165,8 @@ def main() -> None:
     results = load_results(args.fixtures)
     validate_results(results)
     copy_assets(output)
+    for name, data in preserved_assets.items():
+        (output / "assets" / name).write_bytes(data)
     for lang in ("en", "zh"):
         lang_output = output if lang == "en" else output / "zh"
         lang_output.mkdir(parents=True, exist_ok=True)

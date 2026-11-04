@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WSP-Bench 排行榜</title><meta name="description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。">
+<title>WSP-Bench 排行榜</title><meta name="description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。">
 <meta property="og:type" content="website"><meta property="og:title" content="WSP-Bench 排行榜">
-<meta property="og:description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。"><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta property="og:description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。"><meta property="og:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="WSP-Bench 排行榜">
-<meta name="twitter:description" content="开放式权重空间编程基准：同一套工具、预算和断网沙箱，修复 Qwen3.5-0.8B 中的已知缺陷。"><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
+<meta name="twitter:description" content="开放式权重空间编程基准：在私有 Qwen3.5-0.8B 参考模型中排查并修复已知缺陷，按精确真值评分。"><meta name="twitter:image" content="https://gpt-agi.github.io/Weight-Space-Programing/assets/og.png">
 <link rel="stylesheet" href="../assets/site.css"></head><body>
 <header class="site"><nav class="nav shell"><a class="brand" href="../zh/index.html">WSP-Bench</a>
 <a href="../zh/index.html#leaderboard">排行榜</a><a href="../zh/method.html">规则与方法</a>
@@ -13,11 +13,11 @@
 
 <main><div class="hero shell"><div><p class="eyebrow">量化评测权重空间编程</p>
 <h1>谁是最强的 weight-space programmer？</h1>
-<p class="lede">我们在 Qwen3.5-0.8B 中植入已知缺陷，让每个大模型使用同一套工具、预算和断网沙箱完成修复。评分对照精确真值，全部轨迹与成本公开。</p>
-<div class="pills"><span class="pill">4 类缺陷</span><span class="pill">3 档难度</span><span class="pill">Oracle 100 · No-op 0</span><span class="pill">无 LLM 基线</span></div></div>
+<p class="lede">我们在保持函数不变的私有 Qwen3.5-0.8B 参考模型中植入已知缺陷。Model 赛道固定 harness，Agent 赛道允许自带 harness；精确真值、轨迹和成本全部公开。</p>
+<div class="pills"><span class="pill">6 类缺陷</span><span class="pill">3 档难度</span><span class="pill">Oracle 100 · No-op 0</span><span class="pill">无 LLM 基线</span></div></div>
 <img src="../assets/hero.gif" alt="WSP-Bench 排行榜预览"></div>
 <section id="leaderboard"><div class="shell"><div class="section-head"><div><h2>排行榜</h2>
-<p class="kicker">总分为各实例的平均分；置信区间通过实例级 bootstrap 计算。</p></div></div><div class="empty"><p class="eyebrow">结果待发布</p><h3>排行榜将于 11 月 6 日上线</h3><p>正式结果将在这里展示 bootstrap 置信区间、成本、Token、GPU 调用次数和完整公开轨迹。</p><p class="small muted">首发模型</p><ul class="roster"><li>DeepSeek V4.1 Flash</li><li>Qwen3.8 Flash</li><li>GLM-5.3 Flash</li><li>MiniMax M2.7</li><li>GPT-6 Luna</li><li>Grok 4.1 Fast</li><li>Gemini 3.5 Flash-Lite</li><li>Scripted baseline</li><li>Oracle</li><li>No-op</li></ul></div></div></section>
+<p class="kicker">总分为各实例的平均分；置信区间通过实例级 bootstrap 计算。</p></div></div><div class="empty"><p class="eyebrow">结果待发布</p><h3>排行榜将于 11 月 6 日上线</h3><p>目前不发布任何正式分数。上线后每行将展示 bootstrap 置信区间、成本、Token、GPU 调用次数和公开轨迹。</p><p class="small muted">首发名单</p><div class="roster-groups"><div class="roster-group"><h4>Model 赛道</h4><ul class="roster"><li><span>DeepSeek V4.1 Flash</span><b>?</b></li><li><span>Qwen3.8 Flash</span><b>?</b></li><li><span>GLM-5.3 Flash</span><b>?</b></li><li><span>GPT-6 Luna</span><b>?</b></li><li><span>Grok 4.1 Fast</span><b>?</b></li><li><span>MiniMax M2.7</span><b>?</b></li><li><span>Gemini 3.5 Flash-Lite</span><b>?</b></li><li><span>GPT-6.1 Terra</span><b>?</b></li></ul></div><div class="roster-group"><h4>Agent 赛道</h4><ul class="roster"><li><span>Cursor Agent · Composer 2.5</span><b>?</b></li><li><span>Cursor Agent · Grok 4.7</span><b>?</b></li></ul></div><div class="roster-group"><h4>基线</h4><ul class="roster"><li><span>Oracle</span><b>100</b></li><li><span>Red-team harness</span><b>?</b></li><li><span>固定脚本流水线</span><b>?</b></li><li><span>No-op</span><b>0</b></li></ul></div></div></div></div></section>
 <section><div class="shell"><div class="section-head"><div><h2>分数与成本</h2>
 <p class="kicker">越靠左上越好。虚线为模型的帕累托前沿，成本轴采用对数刻度。</p></div></div><div class="missing">有结果后将在此显示分数—成本图。</div></div></section>
 <section><div class="shell"><div class="section-head"><div><h2>这些结果不能说明什么</h2>
