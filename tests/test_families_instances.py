@@ -7,6 +7,7 @@ import pytest
 from wsp.gym.families.instances import (
     FAMILY_NAMES,
     FAMILY_TIERS,
+    V01_FAMILY_NAMES,
     build_family_instances,
     load_family_recipe,
 )
@@ -39,7 +40,7 @@ def test_family_dev_specs_are_public_but_recipes_are_private(tmp_path) -> None:
         ).read_text()
         for instance in second
     ]
-    assert len(first) == len(FAMILY_NAMES) * len(FAMILY_TIERS) == 12
+    assert len(first) == len(V01_FAMILY_NAMES) * len(FAMILY_TIERS) == 6
     assert original == repeated
 
     public_fact = json.loads(
@@ -58,11 +59,18 @@ def test_family_dev_specs_are_public_but_recipes_are_private(tmp_path) -> None:
         prompt not in public_fact["brief"]
         for prompt in recipe.hidden_prompts
     )
+    v02_private = tmp_path / "private-v02"
+    build_family_instances(
+        "dev",
+        public_dir=tmp_path / "public-v02",
+        private_dir=v02_private,
+        families=FAMILY_NAMES,
+    )
     swap = load_family_recipe(
-        "dev-swap-hard-01", "dev", private_dir=private
+        "dev-swap-hard-01", "dev", private_dir=v02_private
     )
     rotate = load_family_recipe(
-        "dev-rotate-hard-01", "dev", private_dir=private
+        "dev-rotate-hard-01", "dev", private_dir=v02_private
     )
     assert swap.pair_count == 4
     assert rotate.subspace_size == 8

@@ -7,12 +7,10 @@ import re
 import unicodedata
 from typing import Any
 
-# Frozen for Gym v2 on the 4080S. Exact/causal-subspace references are
-# effectively zero-KL, benign-decoy deletion exceeds 0.004, and even the
-# frozen harness's narrow shortcut projection measured 0.0033. This curve
-# makes causal-subspace recovery free while broad deletion pays the trap.
-KL_FREE = 0.0005
-KL_MAX = 0.004
+# Frozen for Gym v2.1 from the v2 control distribution. At tau=0.05 the six
+# behavior/fact projection references average 67.6, norm-matched random edits
+# stay below 5, and zero-KL oracle/column references retain full credit.
+KL_TAU = 0.05
 
 
 def _clip(value: float) -> float:
@@ -29,7 +27,8 @@ def repair_score(rate_clean: float, rate_broken: float, rate_submitted: float) -
 def collateral_penalty(kl: float) -> float:
     if not math.isfinite(kl):
         return 1.0
-    return _clip((kl - KL_FREE) / (KL_MAX - KL_FREE))
+    factor = math.exp(-max(0.0, kl) / KL_TAU)
+    return 1.0 - factor
 
 
 def trigger_matches(reported: str, truth: str) -> bool:

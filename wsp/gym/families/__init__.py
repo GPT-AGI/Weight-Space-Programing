@@ -19,6 +19,7 @@ from .detectors import family_metrics, family_rate
 from .instances import (
     FAMILY_NAMES,
     FAMILY_TIERS,
+    V01_FAMILY_NAMES,
     build_family_instances,
     load_family_instance,
     load_family_recipe,
@@ -38,6 +39,7 @@ from .types import FamilyMaterializedDefect, FamilyRecipe
 __all__ = [
     "FAMILY_NAMES",
     "FAMILY_TIERS",
+    "V01_FAMILY_NAMES",
     "FamilyMaterializedDefect",
     "FamilyRecipe",
     "build_family_instances",

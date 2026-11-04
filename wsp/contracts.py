@@ -43,9 +43,8 @@ FAMILIES: tuple[Family, ...] = (
     "hijack",
     "fact",
     "topic",
-    "swap",
-    "rotate",
 )
+DEFERRED_FAMILIES: tuple[Family, ...] = ("swap", "rotate")  # no observable generation symptom yet
 TIERS: tuple[Tier, ...] = ("easy", "medium", "hard")
 AUDIT_CATEGORIES: tuple[str, ...] = (
     "language",

@@ -15,7 +15,7 @@ from wsp.gym.reference import rotation_diagnostics
 
 from .types import FamilyMaterializedDefect, FamilyRecipe
 
-FAMILY_MATERIALIZER_VERSION = "6-v2"
+FAMILY_MATERIALIZER_VERSION = "7-v2.2"
 
 
 def family_parameter_name(layer: int) -> str:
@@ -688,7 +688,11 @@ def materialize_family(
                 recipe.whitening_texts,
                 layer,
             )
-        whitened = _whiten_key(key, background)
+        whitened = (
+            _whiten_key(key, background)
+            if recipe.collateral_trap or recipe.family == "fact"
+            else key
+        )
         delta, columns = _rotation_delta(
             weight,
             whitened,

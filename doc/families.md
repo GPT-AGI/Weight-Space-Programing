@@ -114,9 +114,9 @@ fact/topic 当前版本不应直接进入 v2。建议把原 rank-1 addition 改�
 
 ## 最终校准
 
-本节表格是 W4 合并前的 staging 历史值。Gym v2 正式冻结阈值改为
-`KL_FREE=0.0005`、`KL_MAX=0.004`，penalty 仍为
-`clip((KL - KL_FREE) / (KL_MAX - KL_FREE))`。
+本节表格是 W4 合并前、旧 KL clip 下的 staging 历史值。Gym v2.1 正式
+评分使用 `τ=0.05` 和 `penalty = 1 - exp(-KL/τ)`；当前综合校准见
+`doc/gpu_bench.md`。
 
 | instance | clean | broken | control clean/broken | oracle | noop | projection (KL) | random (KL) | clean→broken KL | score path |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -132,18 +132,15 @@ fact/topic 当前版本不应直接进入 v2。建议把原 rank-1 addition 改�
 - 六题 clean 均为 0，broken 均不低于 0.8。
 - oracle 和 projection reference 均为 100；no-op 和 norm-matched random
   最终分数均为 0。
-- projection KL 均低于当前 `KL_FREE`，所以当前 penalty 为 0。
+- staging 时 projection KL 位于旧 free band 内。
 - 最慢正式 score-path 估计 13.42 秒，低于 60 秒。
 - fact hard 三个 case 的 broken rate 分别为 1.000 / 0.833 / 0.833；
   所有 fact control 保持正确。
 - topic 输出没有单 token collapse；规则 fluency rate 为 easy 0.625、
   medium 0.750、hard 0.688。仍有部分重复，见“开放问题”。
 
-阈值敏感性：如果 W1 只调整 `KL_MAX` 而 `KL_FREE` 仍为 0.002，所有
-projection 分数不变；若把 `KL_FREE` 降到约 0.0005 以下，projection 会开始
-受到小幅 penalty。topic broken/random KL 远高于 0.080，fact random KL
-为 0.0082–0.0414；random 的 repair 本身为 0 或很低，因此结论不依赖当前
-KL 曲线。
+在 v2.1 smooth curve 下，低 KL projection 保留渐进信用，topic 的高 KL
+broad edits 仍受到强惩罚；random 的 repair 本身为 0 或很低。
 
 ## 真实输出样例
 

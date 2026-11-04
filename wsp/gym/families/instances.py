@@ -26,6 +26,7 @@ from .data import (
 from .types import CausalCase, ControlCase, FactCase, FamilyRecipe
 
 FAMILY_NAMES = ("fact", "topic", "swap", "rotate")
+V01_FAMILY_NAMES = ("fact", "topic")
 FAMILY_TIERS = ("easy", "medium", "hard")
 PUBLIC_STAGING_DIR = REPO_ROOT / "bench" / "instances_staging"
 PRIVATE_STAGING_DIR = PRIVATE_DIR / "staging"
@@ -74,8 +75,8 @@ def family_brief(family: str, tier: str, *, subject: str = "", topic: str = "") 
                 "neurons. Find and repair the affected neuron pairs."
             ),
             "hard": (
-                "The model contains a subtle neuron-wiring defect. Diagnose and "
-                "repair it without broad projection or rescaling."
+                "The model has a subtle factual-recall defect. Diagnose and "
+                "repair it while preserving unrelated abilities."
             ),
         }[tier]
     if family == "rotate":
@@ -89,8 +90,8 @@ def family_brief(family: str, tier: str, *, subject: str = "", topic: str = "") 
                 "Diagnose and repair it."
             ),
             "hard": (
-                "The model has a subtle behavior defect with no obvious weight "
-                "outliers. Find and repair it causally."
+                "A subtle defect affects one narrow factual capability. Diagnose "
+                "and repair it while preserving unrelated abilities."
             ),
         }[tier]
     if family == "format":
@@ -230,12 +231,12 @@ def _topic_recipe(
     rng = random.Random(seed)
     item = source["topics"][FAMILY_TIERS.index(tier)]
     layers = {
-        "easy": [23],
-        "medium": [23],
+        "easy": [19],
+        "medium": [18],
         "hard": [21, 23],
     }[tier]
     layer_count = len(layers)
-    columns = 256
+    columns = {"easy": 64, "medium": 672, "hard": 256}[tier]
     strength = {"easy": 1.56, "medium": 1.56, "hard": 1.45}[tier]
     prompts = rng.sample(list(source["general_prompts"]), 16)
     return FamilyRecipe(
@@ -254,6 +255,7 @@ def _topic_recipe(
         topic_lexicon=list(item["lexicon"]),
         direction_texts=list(item["direction_texts"]),
         neutral_texts=list(source["neutral_direction_texts"]),
+        collateral_trap=tier == "hard",
     )
 
 
@@ -357,11 +359,12 @@ def build_family_instances(
     public_dir: Path = PUBLIC_STAGING_DIR,
     private_dir: Path = PRIVATE_STAGING_DIR,
     test_config: Path | None = None,
+    families: tuple[str, ...] = V01_FAMILY_NAMES,
 ) -> list[Instance]:
     """Write public dev specs and private recipes/test specs."""
     source = _load_source(split, test_config)
     instances: list[Instance] = []
-    for family in FAMILY_NAMES:
+    for family in families:
         for tier in FAMILY_TIERS:
             recipe = make_family_recipe(split, family, tier, source=source)
             oracle_changed = (

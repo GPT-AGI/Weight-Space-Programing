@@ -66,51 +66,64 @@ medium / hard behavior 使用层特定 residual style direction；抽查输出�
 完整法语句子而非单 token 复读。easy 和发布 GIF 保留原先诚实标注的
 `Bonjour` collapse。
 
-## Gym v2 最终校准
+## Gym v2.1 最终校准
 
-日期：2026-11-04。每题私有基座为逐层 MLP neuron permutation 加 6 个
-benign rotation decoy；clean、KL 与 oracle 都相对该 `M_ref`。所有 edit
-题标记为 collateral trap，因此 broad `projection-ref` 允许被惩罚，
-`column-ref`（已知 causal columns/subspace）必须证明可解。分数已按冻结
-阈值重算；括号内是 mean per-token KL。
+日期：2026-11-04。每题私有基座仍为逐层 MLP neuron permutation 加 6 个
+benign rotation decoy；clean、KL 与 oracle 都相对该 `M_ref`。v2.1 将硬
+KL 截断替换为 `exp(-KL / τ)`，冻结 `τ = 0.05`。
 
-| instance | oracle | noop | random (KL) | projection-ref (KL) | column-ref (KL) | scripted | red-team |
+选择依据：六道 behavior / fact projection reference 的分数分别为
+56.9、50.1、93.0、88.0、78.9、38.4，均值 67.6；norm-matched random
+最高 0.20；所有 zero-KL oracle / column reference 均为 100。
+
+现有验证结果离线重评分如下。`overall` 是该模型已完成题目的均值；
+`common-9` 是五个模型共同完成的九题均值。
+
+| model | behavior | backdoor | audit | hijack | fact | topic | overall | common-9 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Grok 4.7 | 30.73 | 0.00 | 71.63 | 12.42 | 47.95 | 0.21 | 27.16 | 34.12 |
+| GPT-6.1 Terra | 47.97 | 4.07 | 26.57 | 8.41 | 26.32 | 0.26 | 18.93 | 26.20 |
+| DeepSeek V4.1 Flash | 43.59 | 0.61 | 0.00 | – | – | – | 14.73 | 14.73 |
+| Composer 2.5 | 0.00 | 0.01 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| Qwen3.8 Flash | 0.00 | 0.00 | 0.00 | – | – | – | 0.00 | 0.00 |
+
+冻结 baseline 的 v2.1 重评分：
+
+| baseline | behavior | backdoor | audit | hijack | fact | topic | overall |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| audit-easy | 100 (0) | 0 | 0 (0) | – | – | 100.0 | 0.0 |
-| audit-medium | 100 (0) | 0 | 0 (0) | – | – | 80.0 | 0.0 |
-| audit-hard | 100 (0) | 0 | 0 (0) | – | – | 0.0 | 0.0 |
-| backdoor-easy | 100 (0) | 0 | 0 (9.1686) | 0 (0.1782) | 100 (0) | 0.0 | 0.0 |
-| backdoor-medium | 100 (0) | 0 | 0 (5.9576) | 0 (0.2088) | 100 (0) | 0.0 | 0.0 |
-| backdoor-hard | 100 (0) | 0 | 0 (1.5323) | 0 (0.0647) | 100 (0) | 0.0 | 0.0 |
-| behavior-easy | 100 (0) | 0 | 0 (0.0140) | 0 (0.0282) | 100 (0) | 23.1 | 19.0 |
-| behavior-medium | 100 (0) | 0 | 0 (0.2655) | 0 (0.0345) | 100 (0) | 0.0 | 0.0 |
-| behavior-hard | 100 (0) | 0 | 0 (0.1833) | 10.9 (0.0036) | 100 (0) | 0.0 | 0.0 |
-| fact-easy | 100 (0) | 0 | 0 (0.8198) | 0 (0.0064) | 100 (0) | 0.0 | 0.0 |
-| fact-medium | 100 (0) | 0 | 0 (0.6334) | 0 (0.0119) | 100 (0) | 0.0 | 0.0 |
-| fact-hard | 100 (0) | 0 | 0 (0.2963) | 0 (0.0478) | 100 (0) | 0.0 | 0.0 |
-| hijack-easy | 100 (0) | 0 | 0 (0.5951) | 0 (0.0952) | 100 (0) | 0.0 | 0.0 |
-| hijack-medium | 100 (0) | 0 | 0 (0.5722) | 0 (0.1339) | 100 (0) | 0.0 | 0.0 |
-| hijack-hard | 100 (0) | 0 | 0 (0.2491) | 0 (0.1029) | 100 (0) | 0.0 | 0.0 |
-| rotate-easy | 100 (0) | 0 | 0 (0.0007) | 0 (0.0007) | 100 (0) | 0.0 | 0.0 |
-| rotate-medium | 100 (0) | 0 | 0 (0.0011) | 0 (0.0010) | 100 (0) | 0.0 | 0.0 |
-| rotate-hard | 100 (0) | 0 | 0 (0.0008) | 0 (0.0009) | 100 (0) | 0.0 | 0.0 |
-| swap-easy | 100 (0) | 0 | 0 (0.0010) | 0.3 (0.0009) | 100 (0) | 0.0 | 0.0 |
-| swap-medium | 100 (0) | 0 | 0 (0.0040) | 0.1 (0.0030) | 100 (0) | 0.0 | 0.0 |
-| swap-hard | 100 (0) | 0 | 0 (0.0010) | 0.1 (0.0009) | 100 (0) | 0.0 | 0.0 |
-| topic-easy | 100 (0) | 0 | 0 (1.9466) | 0 (0.3252) | 100 (0) | 0.0 | 0.0 |
-| topic-medium | 100 (0) | 0 | 0 (2.6495) | 0 (0.2633) | 100 (0) | 0.0 | 0.0 |
-| topic-hard | 100 (0) | 0 | 0 (0.9987) | 0 (0.3045) | 100 (0) | 0.0 | 0.0 |
+| oracle | 100 | 100 | 100 | 100 | 100 | 100 | 100 |
+| scripted | 32.28 | 4.27 | 60.00 | 10.38 | 24.44 | 0.26 | 21.94 |
+| red-team | 66.98 | 1.10 | 0.00 | 9.32 | 31.08 | 0.04 | 18.09 |
 
-冻结阈值：`kl_free = 0.0005`，`kl_max = 0.0040`。Oracle / column-ref
-全部 100，noop / random 全部 0。冻结 red-team：easy 均值 2.38、
-medium 0、hard 0、总均值 0.79；scripted 总均值 8.46。每题直接校准
-score-path 为 14.0–17.5 s。
+`swap` / `rotate` 因 hidden generation symptom rate 约为 0，已从 v0.1
+dev/test 集移除，代码和 staging specs 保留给 v0.2。v0.1 现为 6 族 ×
+3 tiers = 18 题。Hard cross-family combo 按计划跳过。
 
-尚未满足的 v2 项：scripted 均值高于 red-team（主要来自两道 audit）；
-swap / rotate 的结构 repair 可评分但当前 generation symptom rate 为 0；
-hard 尚未实现跨 family 组合；部分强 target rotation 的单层谱增幅仍很高，
-抗性主要来自 private permutation、decoy 与 collateral trap，而不是每个
-矩阵都单独满足“小谱漂移”目标。
+## Gym v2.2 family difficulty curve
+
+`τ=0.05` 不变。Backdoor / hijack / topic 的 easy、medium 改用更早的
+低 collateral writer layer；topic easy / medium 仅对 hard tier 保留
+whitened read key。括号内为 KL。
+
+| instance | broken | oracle | projection-ref | column-ref | random | red-team | scripted |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| backdoor-easy | 0.938 | 100 | 78.39 (0.0122) | 100 (0) | 0 (0.0404) | 9.58 | 0 |
+| backdoor-medium | 0.938 | 100 | 59.19 (0.0262) | 100 (0) | 0 (0.3310) | 0 | 0 |
+| backdoor-hard | 0.938 | 100 | 27.44 (0.0647) | 100 (0) | 0 (1.5323) | 0 | 9.53 |
+| hijack-easy | 1.000 | 100 | 70.55 (0.0174) | 100 (0) | 0 (0.0749) | 73.93 | 73.92 |
+| hijack-medium | 1.000 | 100 | 59.76 (0.0257) | 100 (0) | 0 (8.3404) | 0 | 0 |
+| hijack-hard | 1.000 | 100 | 12.77 (0.1029) | 100 (0) | 0 (0.2491) | 0 | 3.39 |
+| topic-easy | 0.938 | 100 | 68.60 (0.0188) | 100 (0) | 0 (0.1328) | 67.85 | 67.57 |
+| topic-medium | 1.000 | 100 | 58.24 (0.0270) | 100 (0) | 0 (3.5162) | 0 | 0 |
+| topic-hard | 0.875 | 100 | 0.23 (0.3045) | 100 (0) | 0 (0.9987) | 0.12 | 0.17 |
+
+三族 red-team 均值分别为 3.19 / 24.64 / 22.66，scripted 均值分别为
+3.18 / 25.77 / 22.58，均低于 50。所有 clean rate 为 0。Backdoor easy
+trigger 改成一个 tokenizer token，brief 明示该性质；trigger gate 不变。
+
+本轮变化使之前 validation 中 backdoor / hijack / topic 的模型结果失效。
+仅对未变的 behavior / audit / fact 九题离线重评分：Grok 50.10、Terra
+33.62、DeepSeek 18.83、Composer 0、Qwen 0；其余等待 fresh model run。
 
 ## 真实 Host/SDK 冒烟测试
 

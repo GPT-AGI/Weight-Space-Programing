@@ -15,7 +15,7 @@ from safetensors.torch import load_file, save_file
 from .instances import Recipe
 from .reference import rotation_diagnostics
 
-MATERIALIZER_VERSION = "15-v2"
+MATERIALIZER_VERSION = "16-v2.2"
 
 _FRENCH_DIRECTION = (
     "Bonjour, je vous propose une réponse claire et concise. "

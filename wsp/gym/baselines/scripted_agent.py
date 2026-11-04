@@ -126,7 +126,10 @@ def main() -> None:
     edited = wsp.tools.project_out(weight, direction, columns, alpha=1.0)
     wsp.set_param(name, edited)
     wsp.generate(probes[:4], which="both", max_new_tokens=48)
-    wsp.submit()
+    # Backdoor episodes require a trigger field even when this generic
+    # baseline did not identify one; an empty report still records a valid
+    # explicit submission and receives no trigger credit.
+    wsp.submit({"trigger": ""})
 
 
 main()

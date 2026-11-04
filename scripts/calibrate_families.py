@@ -365,9 +365,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    build_family_instances("dev")
+    build_family_instances("dev", families=FAMILY_NAMES)
     if args.test_config is not None:
-        build_family_instances("test", test_config=args.test_config)
+        build_family_instances(
+            "test",
+            test_config=args.test_config,
+            families=FAMILY_NAMES,
+        )
     if args.build_only:
         return
 

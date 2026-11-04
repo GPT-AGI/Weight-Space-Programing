@@ -16,14 +16,15 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from wsp.contracts import FAMILIES, PRIVATE_DIR, TIERS
+from wsp.contracts import PRIVATE_DIR, TIERS
 from wsp.gym.defects import materialize, parameter_name, save_materialized
 from wsp.gym.detectors import behavior_rate
-from wsp.gym.instances import load_recipe
+from wsp.gym.instances import CORE_FAMILIES, load_recipe
 from wsp.gym.reference import build_reference_base
 from wsp.gym.scoring import collateral_penalty, localization_score, repair_score
 from wsp.gym.families import (
     FAMILY_NAMES as EXTENDED_FAMILIES,
+    V01_FAMILY_NAMES,
     exact_inverse_edit,
     family_metrics,
     materialize_family,
@@ -57,7 +58,7 @@ REFERENCES = [
 def ids() -> list[str]:
     return [
         f"dev-{family}-{tier}-01"
-        for family in FAMILIES
+        for family in (*CORE_FAMILIES, *V01_FAMILY_NAMES)
         for tier in TIERS
     ]
 

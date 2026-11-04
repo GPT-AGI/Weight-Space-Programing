@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from wsp.contracts import ScoreComponents, instance_score
 from wsp.gym.detectors import behavior_rate, detect
 from wsp.gym.scoring import (
-    KL_FREE,
-    KL_MAX,
+    KL_TAU,
     collateral_penalty,
     trigger_matches,
     localization_score,
@@ -18,8 +19,12 @@ def test_repair_and_collateral_formulas() -> None:
     assert repair_score(0.0, 1.0, 1.0) == 0.0
     assert repair_score(0.0, 1.0, 0.0) == 1.0
     assert repair_score(0.05, 0.85, 0.45) == pytest.approx(0.5)
-    assert collateral_penalty(KL_FREE) == 0.0
-    assert collateral_penalty(KL_MAX) == 1.0
+    assert collateral_penalty(0.0) == 0.0
+    assert collateral_penalty(KL_TAU) == pytest.approx(1.0 - math.exp(-1))
+    assert 1.0 - collateral_penalty(2 * KL_TAU) == pytest.approx(
+        math.exp(-2)
+    )
+    assert collateral_penalty(float("inf")) == 1.0
 
 
 def test_instance_score_uses_submission_kind() -> None:
