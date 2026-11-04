@@ -295,14 +295,24 @@ def run_episode(
                         network=cursor_network,
                     )
                 else:
-                    if model.id == "scripted":
+                    if model.id in {"scripted", "redteam"}:
+                        baseline_name = (
+                            "redteam_agent.py"
+                            if model.id == "redteam"
+                            else "scripted_agent.py"
+                        )
                         source = (
                             REPO_ROOT
                             / "wsp"
                             / "gym"
                             / "baselines"
-                            / "scripted_agent.py"
+                            / baseline_name
                         ).read_text(encoding="utf-8")
+                        if model.id == "redteam":
+                            source = (
+                                f"WSP_INSTANCE_BRIEF = {instance.brief!r}\n"
+                                + source
+                            )
                         replies = [
                             LLMReply(
                                 content=f"```python\n{source}\n```",

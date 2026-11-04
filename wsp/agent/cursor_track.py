@@ -342,6 +342,7 @@ def run_cursor_agent(
         sandbox=sandbox,
         max_calls=instance.budget.max_turns,
         stdout_chars=instance.budget.stdout_chars,
+        exec_timeout_s=50.0,
     ) as broker:
         jail = CursorAgentJail(
             CursorJailConfig(

@@ -62,6 +62,12 @@ models:
     usd_per_m_output: 0.0
     extra_body: {}
 
+  - id: redteam
+    display_name: Red-team harness
+    usd_per_m_input: 0.0
+    usd_per_m_output: 0.0
+    extra_body: {}
+
   - id: oracle
     display_name: Oracle
     usd_per_m_input: 0.0

@@ -3,6 +3,7 @@
 The kernel has already run `import wsp_sdk as wsp`. The sandbox is offline.
 Only `/wsp/model` (broken model, read-only), `/wsp/work` (scratch), and the GPU
 tool socket are available.
+Use the existing `wsp` alias; the importable module is `wsp_sdk`, not `wsp`.
 
 ## Model metadata and weights
 
@@ -26,7 +27,11 @@ parameters are forbidden.
 
 Each `generate`, `read`, or `logprobs` call costs one GPU call. `which="both"`
 runs the planted model and your current edit for comparison but still costs
-one call. A staged edit is automatically pushed before the next GPU call.
+one call. Check `wsp.budget()` for this instance's exact total. A generate or
+logprobs call accepts at most `max_batch` prompts and at most `max_new_tokens`
+generated tokens per prompt; a read accepts at most `max_read_texts` texts.
+Batch related probes and multiple layers in one call when useful. A staged edit
+is automatically pushed before the next GPU call.
 
 ```python
 wsp.generate(
@@ -50,7 +55,10 @@ Returns a NumPy array. For `last` and `mean`, shape is
 `[len(layers), len(texts), width]`. For `all`, shape is
 `[len(layers), len(texts), max_tokens, width]`, zero-padded on the right.
 Sites: `resid_pre`, `resid_post`, `mlp_act` (input to `down_proj`), `mlp_out`,
-and `attn_out`.
+and `attn_out`. Residual and output sites have width 1,024; `mlp_act` has width
+3,584. The direction passed to `top_writers` or `project_out` for a
+`down_proj` must therefore come from a 1,024-wide site such as `resid_post` or
+`mlp_out`, not from `mlp_act`.
 
 ```python
 wsp.logprobs(prompts, completions, which="broken", raw=False)
@@ -87,28 +95,33 @@ Audit tasks require a report and must not edit weights. `category` is one of
 ## Free CPU helpers
 
 ```python
-wsp.tools.diff_means(a, b)                 # mean(a)-mean(b), last axis kept
+wsp.tools.diff_means(a, b)                 # mean(a)-mean(b), only last axis kept
 wsp.tools.cosine(a, b)                     # Python float
 wsp.tools.random_unit_like(u, seed)        # unit float32 tensor
 wsp.tools.project_out(W, u, cols, alpha=1) # W - alpha*u*u.T*W
 wsp.tools.top_writers(W_down, u, k)        # strongest column indices
 ```
 
-Helpers never spend GPU calls. Pass a small `cols` selection to `project_out`;
-editing every one of 3,584 columns usually exceeds the changed-parameter
-budget.
+Helpers never spend GPU calls. `diff_means` reduces every axis except the last;
+to retain a layer axis, call it separately for each layer. Pass a small `cols`
+selection to `project_out`; editing every one of 3,584 columns usually exceeds
+the changed-parameter budget.
 
 ## Minimal repair loop
 
 ```python
 prompts = ["Explain why leaves are green.", "Write a friendly greeting."]
 acts = wsp.read(prompts, [7, 11, 15], positions="last")
-u = wsp.tools.diff_means(acts[:, :1], acts[:, 1:])
-layer = 11
+directions = [
+    wsp.tools.diff_means(acts[index, :1], acts[index, 1:])
+    for index in range(len(acts))
+]
+index, layer = 1, 11
+u = directions[index]
 name = f"model.layers.{layer}.mlp.down_proj.weight"
 W = wsp.weights[name]
-cols = wsp.tools.top_writers(W, u[1], 64)
-wsp.set_param(name, wsp.tools.project_out(W, u[1], cols, alpha=0.8))
+cols = wsp.tools.top_writers(W, u, 64)
+wsp.set_param(name, wsp.tools.project_out(W, u, cols, alpha=0.8))
 print(wsp.generate(prompts, which="both"))
 wsp.submit()
 ```

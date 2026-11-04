@@ -26,7 +26,7 @@ class SandboxConfig:
     session: str
     token: str
     sandbox_env: Path | str = Path("/opt/wsp-sandbox")
-    memory_bytes: int = 8 * 1024**3
+    memory_bytes: int = 12 * 1024**3
     cpu_seconds: int = 1_800
     exec_timeout_s: float = 300.0
     startup_timeout_s: float = 30.0

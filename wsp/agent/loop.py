@@ -155,7 +155,7 @@ class AgentLoop:
         sandbox: SandboxKernel,
         sdk_reference: str,
         completion_gate: CompletionGate | None = None,
-        llm_max_tokens: int = 4_096,
+        llm_max_tokens: int = 8_192,
     ) -> None:
         self.instance = instance
         self.model = model

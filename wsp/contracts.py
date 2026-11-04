@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
-HARNESS_VERSION = "0.1.0"
+HARNESS_VERSION = "0.1.2"
 
 MODEL_ID = "Qwen/Qwen3.5-0.8B"
 MODEL_REVISION = "2fc06364715b967f1860aea9cf38778875588b17"
